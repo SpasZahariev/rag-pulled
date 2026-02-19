@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 import { ensureDir, writeFile } from 'fs-extra';
 
 const ALLOWED_EXTENSIONS = new Set([
-  '.csd',
   '.csv',
   '.pdf',
   '.md',

@@ -1,0 +1,101 @@
+invoice_id,invoice_date,due_date,customer_id,customer_name,customer_email,billing_country,invoice_status,currency,subtotal,tax_amount,total_amount,payment_method,paid_date,line_items,notes
+INV-2026-0001,2026-01-01,2026-01-31,CUST-001,Acme Retail,ap@acmeretail.com,US,paid,USD,1200.00,96.00,1296.00,card,2026-01-05,Laptop_Stand_x10|USB_Hub_x5,January office accessories
+INV-2026-0002,2026-01-02,2026-02-01,CUST-002,Northwind Traders,billing@northwindtraders.com,US,paid,USD,850.00,68.00,918.00,bank_transfer,2026-01-10,Keyboard_x20|Mouse_x20,Quarterly hardware refresh
+INV-2026-0003,2026-01-03,2026-02-02,CUST-003,Blue Harbor Cafe,finance@blueharborcafe.com,CA,sent,CAD,430.00,21.50,451.50,card,,POS_Printer_Rolls_x30,Awaiting payment confirmation
+INV-2026-0004,2026-01-04,2026-02-03,CUST-004,Sunpeak Logistics,acct@sunpeaklogistics.com,US,overdue,USD,2200.00,176.00,2376.00,ach,,Fleet_Tracking_Subscription_x1,Follow up needed this week
+INV-2026-0005,2026-01-05,2026-02-04,CUST-005,Maple Medical,maple.ap@maplemedical.com,CA,paid,CAD,1640.00,82.00,1722.00,bank_transfer,2026-01-22,Gloves_Box_x200|Masks_Box_x100,Hospital supplies restock
+INV-2026-0006,2026-01-06,2026-02-05,CUST-006,Helios Fitness,payables@heliosfitness.com,UK,paid,GBP,990.00,198.00,1188.00,card,2026-01-12,Treadmill_Maintenance_x3,Service contract invoice
+INV-2026-0007,2026-01-07,2026-02-06,CUST-007,Orchid Hotels,finance@orchidhotels.com,US,draft,USD,3100.00,248.00,3348.00,bank_transfer,,Linens_Set_x60|Towels_Set_x120,Pending manager approval
+INV-2026-0008,2026-01-08,2026-02-07,CUST-008,Pioneer Education,ap@pioneeredu.org,US,paid,USD,760.00,60.80,820.80,ach,2026-01-18,Projector_Lamp_x8,Campus AV maintenance
+INV-2026-0009,2026-01-09,2026-02-08,CUST-009,Vertex Bio,accounts@vertexbio.com,DE,sent,EUR,1450.00,275.50,1725.50,bank_transfer,,Lab_Filter_Set_x25,Net 30 terms
+INV-2026-0010,2026-01-10,2026-02-09,CUST-010,Cedar Legal,billing@cedarlegal.com,US,paid,USD,680.00,54.40,734.40,card,2026-01-15,Document_Shred_Service_x4,Monthly records disposal
+INV-2026-0011,2026-01-11,2026-02-10,CUST-011,Urban Thread,payments@urbanthread.com,US,paid,USD,1320.00,105.60,1425.60,paypal,2026-01-20,Fabric_Roll_x22,Spring line materials
+INV-2026-0012,2026-01-12,2026-02-11,CUST-012,Atlas Design,ap@atlasdesign.studio,AU,sent,AUD,910.00,91.00,1001.00,card,,Cloud_Render_Credits_x140,Awaiting card settlement
+INV-2026-0013,2026-01-13,2026-02-12,CUST-013,Riverbank Foods,finance@riverbankfoods.com,US,overdue,USD,2750.00,220.00,2970.00,ach,,Cold_Storage_Service_x1,Escalated to collections queue
+INV-2026-0014,2026-01-14,2026-02-13,CUST-014,Peak Properties,accounts@peakproperties.com,US,paid,USD,540.00,43.20,583.20,bank_transfer,2026-01-30,Inspection_Visit_x6,January property checks
+INV-2026-0015,2026-01-15,2026-02-14,CUST-015,Silverline Media,payables@silverlinemedia.com,UK,paid,GBP,1260.00,252.00,1512.00,card,2026-01-25,Ad_Campaign_Review_x3,Creative retainer cycle
+INV-2026-0016,2026-01-16,2026-02-15,CUST-016,Nimbus Energy,ap@nimbusenergy.io,US,sent,USD,3400.00,272.00,3672.00,bank_transfer,,Sensor_Node_x40,Procurement approval pending
+INV-2026-0017,2026-01-17,2026-02-16,CUST-017,Bloom Boutique,billing@bloomboutique.com,CA,paid,CAD,470.00,23.50,493.50,card,2026-01-23,Display_Kit_x5,Storefront refresh
+INV-2026-0018,2026-01-18,2026-02-17,CUST-018,Quasar Mobility,finance@quasarmobility.com,US,paid,USD,1890.00,151.20,2041.20,ach,2026-01-31,Wheel_Module_x14,Field repair order
+INV-2026-0019,2026-01-19,2026-02-18,CUST-019,Harbor Dental,accounts@harbordental.ca,CA,draft,CAD,620.00,31.00,651.00,card,,Dental_Chair_Cover_x50,Draft before clinic confirmation
+INV-2026-0020,2026-01-20,2026-02-19,CUST-020,Stonebridge IT,ap@stonebridgeit.com,US,paid,USD,2150.00,172.00,2322.00,bank_transfer,2026-02-03,Managed_IT_Hours_x43,January managed services
+INV-2026-0021,2026-01-21,2026-02-20,CUST-021,Luna Cosmetics,finance@lunacosmetics.com,FR,sent,EUR,980.00,196.00,1176.00,paypal,,Packaging_Set_x70,Waiting for PO release
+INV-2026-0022,2026-01-22,2026-02-21,CUST-022,Greenline Transit,billing@greenlinetransit.com,US,overdue,USD,4020.00,321.60,4341.60,ach,,Route_Analytics_Subscription_x1,Second reminder issued
+INV-2026-0023,2026-01-23,2026-02-22,CUST-023,Oakridge School,accounts@oakridge-school.edu,US,paid,USD,730.00,58.40,788.40,card,2026-02-01,Tablet_Case_x60,Technology program accessories
+INV-2026-0024,2026-01-24,2026-02-23,CUST-024,Summit Outdoors,ap@summitoutdoors.com,US,paid,USD,1580.00,126.40,1706.40,bank_transfer,2026-02-06,Camping_Stove_x25,Wholesale equipment order
+INV-2026-0025,2026-01-25,2026-02-24,CUST-025,Polaris Labs,finance@polarislabs.ai,US,sent,USD,2440.00,195.20,2635.20,card,,GPU_Runtime_Hours_x610,Pending research grant disbursement
+INV-2026-0026,2026-01-26,2026-02-25,CUST-001,Acme Retail,ap@acmeretail.com,US,paid,USD,910.00,72.80,982.80,paypal,2026-02-04,Barcode_Scanner_x7,Backroom scanning upgrade
+INV-2026-0027,2026-01-27,2026-02-26,CUST-002,Northwind Traders,billing@northwindtraders.com,US,paid,USD,1120.00,89.60,1209.60,bank_transfer,2026-02-07,Shelf_Label_Printer_x2,Warehouse labeling cycle
+INV-2026-0028,2026-01-28,2026-02-27,CUST-003,Blue Harbor Cafe,finance@blueharborcafe.com,CA,sent,CAD,360.00,18.00,378.00,card,,Coffee_Grinder_Service_x2,Awaiting owner signoff
+INV-2026-0029,2026-01-29,2026-02-28,CUST-004,Sunpeak Logistics,acct@sunpeaklogistics.com,US,paid,USD,2680.00,214.40,2894.40,ach,2026-02-12,Truck_Diagnostic_Tool_x4,Maintenance tooling purchase
+INV-2026-0030,2026-01-30,2026-03-01,CUST-005,Maple Medical,maple.ap@maplemedical.com,CA,overdue,CAD,1490.00,74.50,1564.50,bank_transfer,,Sterile_Drape_Pack_x90,Payment contact unavailable
+INV-2026-0031,2026-01-31,2026-03-02,CUST-006,Helios Fitness,payables@heliosfitness.com,UK,paid,GBP,840.00,168.00,1008.00,card,2026-02-10,Resistance_Band_Set_x40,Member onboarding kits
+INV-2026-0032,2026-02-01,2026-03-03,CUST-007,Orchid Hotels,finance@orchidhotels.com,US,paid,USD,3340.00,267.20,3607.20,bank_transfer,2026-02-14,Mini_Bar_Refill_Set_x50,Regional property replenishment
+INV-2026-0033,2026-02-02,2026-03-04,CUST-008,Pioneer Education,ap@pioneeredu.org,US,sent,USD,640.00,51.20,691.20,ach,,Classroom_Speaker_x16,School district billing cycle
+INV-2026-0034,2026-02-03,2026-03-05,CUST-009,Vertex Bio,accounts@vertexbio.com,DE,paid,EUR,1710.00,324.90,2034.90,bank_transfer,2026-02-19,Micropipette_Tip_Box_x120,Laboratory consumables
+INV-2026-0035,2026-02-04,2026-03-06,CUST-010,Cedar Legal,billing@cedarlegal.com,US,draft,USD,520.00,41.60,561.60,card,,Secure_Archive_Box_x30,Pending partner approval
+INV-2026-0036,2026-02-05,2026-03-07,CUST-011,Urban Thread,payments@urbanthread.com,US,paid,USD,1480.00,118.40,1598.40,paypal,2026-02-16,Pattern_Template_x80,Production floor restock
+INV-2026-0037,2026-02-06,2026-03-08,CUST-012,Atlas Design,ap@atlasdesign.studio,AU,paid,AUD,1060.00,106.00,1166.00,card,2026-02-21,Mockup_Plugin_License_x12,Team license renewal
+INV-2026-0038,2026-02-07,2026-03-09,CUST-013,Riverbank Foods,finance@riverbankfoods.com,US,sent,USD,2820.00,225.60,3045.60,ach,,Cold_Chain_Labels_x400,Awaiting receivables processing
+INV-2026-0039,2026-02-08,2026-03-10,CUST-014,Peak Properties,accounts@peakproperties.com,US,paid,USD,610.00,48.80,658.80,bank_transfer,2026-02-24,Lockbox_Service_x10,Residential complex run
+INV-2026-0040,2026-02-09,2026-03-11,CUST-015,Silverline Media,payables@silverlinemedia.com,UK,overdue,GBP,1340.00,268.00,1608.00,card,,Video_Render_Queue_x290,Outstanding from prior cycle
+INV-2026-0041,2026-02-10,2026-03-12,CUST-016,Nimbus Energy,ap@nimbusenergy.io,US,paid,USD,3210.00,256.80,3466.80,bank_transfer,2026-02-26,Transformer_Sensor_x18,Grid monitoring expansion
+INV-2026-0042,2026-02-11,2026-03-13,CUST-017,Bloom Boutique,billing@bloomboutique.com,CA,paid,CAD,530.00,26.50,556.50,card,2026-02-20,Ribbon_Pack_x120,Valentine display materials
+INV-2026-0043,2026-02-12,2026-03-14,CUST-018,Quasar Mobility,finance@quasarmobility.com,US,sent,USD,1760.00,140.80,1900.80,ach,,Spare_Battery_x35,Invoice under fleet project
+INV-2026-0044,2026-02-13,2026-03-15,CUST-019,Harbor Dental,accounts@harbordental.ca,CA,paid,CAD,700.00,35.00,735.00,card,2026-03-01,Chair_Headrest_Cover_x80,Routine clinic restock
+INV-2026-0045,2026-02-14,2026-03-16,CUST-020,Stonebridge IT,ap@stonebridgeit.com,US,sent,USD,2270.00,181.60,2451.60,bank_transfer,,Security_Audit_Hours_x31,Awaiting enterprise PO
+INV-2026-0046,2026-02-15,2026-03-17,CUST-021,Luna Cosmetics,finance@lunacosmetics.com,FR,paid,EUR,1090.00,218.00,1308.00,paypal,2026-03-02,Fragrance_Vial_x500,Launch campaign samples
+INV-2026-0047,2026-02-16,2026-03-18,CUST-022,Greenline Transit,billing@greenlinetransit.com,US,paid,USD,3880.00,310.40,4190.40,ach,2026-03-04,Passenger_Counter_Module_x12,Operations analytics order
+INV-2026-0048,2026-02-17,2026-03-19,CUST-023,Oakridge School,accounts@oakridge-school.edu,US,draft,USD,680.00,54.40,734.40,card,,Library_Tablet_Stand_x24,Budget office review
+INV-2026-0049,2026-02-18,2026-03-20,CUST-024,Summit Outdoors,ap@summitoutdoors.com,US,paid,USD,1660.00,132.80,1792.80,bank_transfer,2026-03-05,Hiking_Pole_Set_x45,Preseason stock order
+INV-2026-0050,2026-02-19,2026-03-21,CUST-025,Polaris Labs,finance@polarislabs.ai,US,overdue,USD,2510.00,200.80,2710.80,card,,Data_Labeling_Hours_x220,Grant billing delay
+INV-2026-0051,2026-02-20,2026-03-22,CUST-001,Acme Retail,ap@acmeretail.com,US,paid,USD,980.00,78.40,1058.40,paypal,2026-03-03,Receipt_Paper_Case_x40,POS terminal supplies
+INV-2026-0052,2026-02-21,2026-03-23,CUST-002,Northwind Traders,billing@northwindtraders.com,US,sent,USD,1240.00,99.20,1339.20,bank_transfer,,Warehouse_Carton_x600,Pending receiving confirmation
+INV-2026-0053,2026-02-22,2026-03-24,CUST-003,Blue Harbor Cafe,finance@blueharborcafe.com,CA,paid,CAD,390.00,19.50,409.50,card,2026-03-06,Espresso_Filter_x200,Monthly cafe consumables
+INV-2026-0054,2026-02-23,2026-03-25,CUST-004,Sunpeak Logistics,acct@sunpeaklogistics.com,US,paid,USD,2810.00,224.80,3034.80,ach,2026-03-07,Telematics_SIM_x150,Fleet telemetry plan
+INV-2026-0055,2026-02-24,2026-03-26,CUST-005,Maple Medical,maple.ap@maplemedical.com,CA,sent,CAD,1580.00,79.00,1659.00,bank_transfer,,Exam_Glove_Box_x260,Net 30 hospital terms
+INV-2026-0056,2026-02-25,2026-03-27,CUST-006,Helios Fitness,payables@heliosfitness.com,UK,paid,GBP,930.00,186.00,1116.00,card,2026-03-08,Locker_Key_Tag_x500,Member locker relabel
+INV-2026-0057,2026-02-26,2026-03-28,CUST-007,Orchid Hotels,finance@orchidhotels.com,US,overdue,USD,3470.00,277.60,3747.60,bank_transfer,,Guest_Amenity_Kit_x900,Payment promised by AP
+INV-2026-0058,2026-02-27,2026-03-29,CUST-008,Pioneer Education,ap@pioneeredu.org,US,paid,USD,720.00,57.60,777.60,ach,2026-03-10,Chromebook_Sleeve_x75,District rollout support
+INV-2026-0059,2026-02-28,2026-03-30,CUST-009,Vertex Bio,accounts@vertexbio.com,DE,paid,EUR,1840.00,349.60,2189.60,bank_transfer,2026-03-11,Centrifuge_Tube_Rack_x40,Bioprocess prep kits
+INV-2026-0060,2026-03-01,2026-03-31,CUST-010,Cedar Legal,billing@cedarlegal.com,US,sent,USD,590.00,47.20,637.20,card,,Court_Filing_Courier_x9,Waiting for case closure
+INV-2026-0061,2026-03-02,2026-04-01,CUST-011,Urban Thread,payments@urbanthread.com,US,paid,USD,1520.00,121.60,1641.60,paypal,2026-03-13,Thread_Cone_x400,Manufacturing line refill
+INV-2026-0062,2026-03-03,2026-04-02,CUST-012,Atlas Design,ap@atlasdesign.studio,AU,sent,AUD,1140.00,114.00,1254.00,card,,Asset_Library_Subscription_x1,Awaiting procurement signoff
+INV-2026-0063,2026-03-04,2026-04-03,CUST-013,Riverbank Foods,finance@riverbankfoods.com,US,paid,USD,2940.00,235.20,3175.20,ach,2026-03-18,Freezer_Alarm_Module_x14,Cold storage reliability project
+INV-2026-0064,2026-03-05,2026-04-04,CUST-014,Peak Properties,accounts@peakproperties.com,US,paid,USD,650.00,52.00,702.00,bank_transfer,2026-03-14,Inspection_Report_Pack_x12,Rental portfolio audit
+INV-2026-0065,2026-03-06,2026-04-05,CUST-015,Silverline Media,payables@silverlinemedia.com,UK,sent,GBP,1420.00,284.00,1704.00,card,,Campaign_Analysis_Hours_x18,Retainer cycle open
+INV-2026-0066,2026-03-07,2026-04-06,CUST-016,Nimbus Energy,ap@nimbusenergy.io,US,paid,USD,3360.00,268.80,3628.80,bank_transfer,2026-03-19,Field_Controller_x22,Utility station upgrades
+INV-2026-0067,2026-03-08,2026-04-07,CUST-017,Bloom Boutique,billing@bloomboutique.com,CA,paid,CAD,560.00,28.00,588.00,card,2026-03-16,Gift_Bag_Pack_x140,Seasonal gift packaging
+INV-2026-0068,2026-03-09,2026-04-08,CUST-018,Quasar Mobility,finance@quasarmobility.com,US,draft,USD,1920.00,153.60,2073.60,ach,,Motor_Controller_Board_x28,Pending engineering review
+INV-2026-0069,2026-03-10,2026-04-09,CUST-019,Harbor Dental,accounts@harbordental.ca,CA,paid,CAD,730.00,36.50,766.50,card,2026-03-20,Disposable_Bib_Pack_x180,Clinic supply reorder
+INV-2026-0070,2026-03-11,2026-04-10,CUST-020,Stonebridge IT,ap@stonebridgeit.com,US,paid,USD,2390.00,191.20,2581.20,bank_transfer,2026-03-22,Patch_Management_Hours_x29,Security maintenance cycle
+INV-2026-0071,2026-03-12,2026-04-11,CUST-021,Luna Cosmetics,finance@lunacosmetics.com,FR,sent,EUR,1160.00,232.00,1392.00,paypal,,Label_Print_Run_x1600,Awaiting finance approval
+INV-2026-0072,2026-03-13,2026-04-12,CUST-022,Greenline Transit,billing@greenlinetransit.com,US,paid,USD,3960.00,316.80,4276.80,ach,2026-03-24,Route_Display_Unit_x20,Transit fleet retrofit
+INV-2026-0073,2026-03-14,2026-04-13,CUST-023,Oakridge School,accounts@oakridge-school.edu,US,paid,USD,760.00,60.80,820.80,card,2026-03-25,Wireless_Access_Point_x6,STEM lab connectivity
+INV-2026-0074,2026-03-15,2026-04-14,CUST-024,Summit Outdoors,ap@summitoutdoors.com,US,sent,USD,1730.00,138.40,1868.40,bank_transfer,,Camping_Lantern_x90,Quarterly wholesale shipment
+INV-2026-0075,2026-03-16,2026-04-15,CUST-025,Polaris Labs,finance@polarislabs.ai,US,paid,USD,2580.00,206.40,2786.40,card,2026-03-28,Annotation_Platform_Seats_x25,Research ops expansion
+INV-2026-0076,2026-03-17,2026-04-16,CUST-001,Acme Retail,ap@acmeretail.com,US,overdue,USD,1040.00,83.20,1123.20,paypal,,Self_Checkout_Support_x8,Collection notice sent
+INV-2026-0077,2026-03-18,2026-04-17,CUST-002,Northwind Traders,billing@northwindtraders.com,US,paid,USD,1310.00,104.80,1414.80,bank_transfer,2026-03-31,Inventory_Tag_x700,Warehouse cycle count support
+INV-2026-0078,2026-03-19,2026-04-18,CUST-003,Blue Harbor Cafe,finance@blueharborcafe.com,CA,paid,CAD,420.00,21.00,441.00,card,2026-03-29,Milk_Frother_Service_x3,Cafe machine upkeep
+INV-2026-0079,2026-03-20,2026-04-19,CUST-004,Sunpeak Logistics,acct@sunpeaklogistics.com,US,sent,USD,2890.00,231.20,3121.20,ach,,Route_Optimization_License_x1,PO expected next week
+INV-2026-0080,2026-03-21,2026-04-20,CUST-005,Maple Medical,maple.ap@maplemedical.com,CA,paid,CAD,1660.00,83.00,1743.00,bank_transfer,2026-04-02,Syringe_Pack_x300,Medical supply chain order
+INV-2026-0081,2026-03-22,2026-04-21,CUST-006,Helios Fitness,payables@heliosfitness.com,UK,paid,GBP,980.00,196.00,1176.00,card,2026-04-01,Yoga_Mat_x120,Studio refresh initiative
+INV-2026-0082,2026-03-23,2026-04-22,CUST-007,Orchid Hotels,finance@orchidhotels.com,US,sent,USD,3550.00,284.00,3834.00,bank_transfer,,Laundry_Detergent_Case_x95,Consolidated property billing
+INV-2026-0083,2026-03-24,2026-04-23,CUST-008,Pioneer Education,ap@pioneeredu.org,US,paid,USD,790.00,63.20,853.20,ach,2026-04-05,Headphone_Set_x55,Testing center equipment
+INV-2026-0084,2026-03-25,2026-04-24,CUST-009,Vertex Bio,accounts@vertexbio.com,DE,overdue,EUR,1960.00,372.40,2332.40,bank_transfer,,Cell_Culture_Media_x60,Past due follow up initiated
+INV-2026-0085,2026-03-26,2026-04-25,CUST-010,Cedar Legal,billing@cedarlegal.com,US,paid,USD,640.00,51.20,691.20,card,2026-04-06,Legal_Research_Hours_x8,Monthly legal ops support
+INV-2026-0086,2026-03-27,2026-04-26,CUST-011,Urban Thread,payments@urbanthread.com,US,sent,USD,1580.00,126.40,1706.40,paypal,,Dye_Batch_Test_x14,Invoice pending QA closeout
+INV-2026-0087,2026-03-28,2026-04-27,CUST-012,Atlas Design,ap@atlasdesign.studio,AU,paid,AUD,1210.00,121.00,1331.00,card,2026-04-07,Design_System_Audit_x1,Quarterly UX review
+INV-2026-0088,2026-03-29,2026-04-28,CUST-013,Riverbank Foods,finance@riverbankfoods.com,US,paid,USD,3050.00,244.00,3294.00,ach,2026-04-08,Temperature_Logger_x30,Food safety instrumentation
+INV-2026-0089,2026-03-30,2026-04-29,CUST-014,Peak Properties,accounts@peakproperties.com,US,sent,USD,700.00,56.00,756.00,bank_transfer,,Lease_File_Digitization_x1,Awaiting month end posting
+INV-2026-0090,2026-03-31,2026-04-30,CUST-015,Silverline Media,payables@silverlinemedia.com,UK,paid,GBP,1490.00,298.00,1788.00,card,2026-04-09,Social_Asset_Package_x24,Creative asset bundle
+INV-2026-0091,2026-04-01,2026-05-01,CUST-016,Nimbus Energy,ap@nimbusenergy.io,US,sent,USD,3440.00,275.20,3715.20,bank_transfer,,Remote_Reader_Gateway_x16,Procurement ticket open
+INV-2026-0092,2026-04-02,2026-05-02,CUST-017,Bloom Boutique,billing@bloomboutique.com,CA,paid,CAD,590.00,29.50,619.50,card,2026-04-11,Window_Display_Prop_x22,Spring visual merchandising
+INV-2026-0093,2026-04-03,2026-05-03,CUST-018,Quasar Mobility,finance@quasarmobility.com,US,paid,USD,2050.00,164.00,2214.00,ach,2026-04-12,Controller_Firmware_Support_x12,Mobility device updates
+INV-2026-0094,2026-04-04,2026-05-04,CUST-019,Harbor Dental,accounts@harbordental.ca,CA,sent,CAD,760.00,38.00,798.00,card,,Sterilization_Pouch_x260,Awaiting admin review
+INV-2026-0095,2026-04-05,2026-05-05,CUST-020,Stonebridge IT,ap@stonebridgeit.com,US,paid,USD,2460.00,196.80,2656.80,bank_transfer,2026-04-14,Endpoint_Protection_Seats_x180,Annual license true up
+INV-2026-0096,2026-04-06,2026-05-06,CUST-021,Luna Cosmetics,finance@lunacosmetics.com,FR,paid,EUR,1230.00,246.00,1476.00,paypal,2026-04-15,Launch_Display_Set_x42,Regional launch support
+INV-2026-0097,2026-04-07,2026-05-07,CUST-022,Greenline Transit,billing@greenlinetransit.com,US,sent,USD,4040.00,323.20,4363.20,ach,,Onboard_Wifi_Module_x26,Capital budget approval pending
+INV-2026-0098,2026-04-08,2026-05-08,CUST-023,Oakridge School,accounts@oakridge-school.edu,US,paid,USD,820.00,65.60,885.60,card,2026-04-17,Classroom_Mic_Set_x12,Auditorium tech update
+INV-2026-0099,2026-04-09,2026-05-09,CUST-024,Summit Outdoors,ap@summitoutdoors.com,US,paid,USD,1810.00,144.80,1954.80,bank_transfer,2026-04-18,Trail_Backpack_x75,Preseason inventory fill
+INV-2026-0100,2026-04-10,2026-05-10,CUST-025,Polaris Labs,finance@polarislabs.ai,US,draft,USD,2660.00,212.80,2872.80,card,,Synthetic_Dataset_Package_x3,Draft for stakeholder review

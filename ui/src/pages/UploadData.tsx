@@ -2,12 +2,11 @@ import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Upload, FileText, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { api, type UploadFilesResponse } from '@/lib/serverComm';
 
-const ACCEPTED_EXTENSIONS = '.csd,.csv,.pdf,.md,.markdown,.xls,.xlsx';
+const ACCEPTED_EXTENSIONS = '.csv,.pdf,.md,.markdown,.xls,.xlsx';
 
 export function UploadData() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -76,7 +75,7 @@ export function UploadData() {
         <div>
           <h1 className="text-3xl font-bold">Upload Data</h1>
           <p className="text-muted-foreground">
-            Upload CSD, PDF, Markdown, and Excel files to temporary backend storage.
+            Upload CSV, PDF, Markdown, and Excel files to temporary backend storage.
           </p>
         </div>
 
@@ -95,14 +94,31 @@ export function UploadData() {
           <CardContent className="space-y-4">
             <form className="space-y-4" onSubmit={onSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="uploadFiles">Choose files</Label>
-                <Input
+                <Label htmlFor="uploadFiles" className="sr-only">
+                  Select files
+                </Label>
+                <input
                   id="uploadFiles"
+                  className="sr-only"
                   type="file"
                   multiple
                   accept={ACCEPTED_EXTENSIONS}
                   onChange={onFileChange}
                 />
+                <label
+                  htmlFor="uploadFiles"
+                  className="group flex cursor-pointer items-center justify-between rounded-md border border-dashed p-4 transition-colors hover:border-primary/60 hover:bg-accent/40"
+                >
+                  <div className="flex items-center gap-3">
+                    <Upload className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5" />
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Click to choose files</p>
+                      <p className="text-xs text-muted-foreground">
+                        CSV, PDF, Markdown, and Excel formats are supported.
+                      </p>
+                    </div>
+                  </div>
+                </label>
               </div>
 
               {selectedFiles.length > 0 ? (
