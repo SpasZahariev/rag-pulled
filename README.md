@@ -39,8 +39,12 @@ Start with everything running locally on your machine, then progressively connec
 Start both frontend and backend (with embedded PostgreSQL database and Firebase emulator):
 
 ```bash
-pnpm run dev
+npm run dev
 ```
+
+For all startup flows in one place (single command, split logs, manual per-terminal), use:
+
+- [`docs/START_SERVICES.md`](docs/START_SERVICES.md)
 
 This automatically assigns available ports and displays them on startup:
 - **Frontend**: Usually `http://localhost:5173` (or next available)
@@ -57,19 +61,19 @@ The system handles port conflicts automatically. For multiple projects, use sepa
 
 ```bash
 # Frontend only
-cd ui && pnpm dev
+cd ui && npm run dev
 
 # Backend only  
-cd server && pnpm dev
+cd server && npm run dev
 
 # Ingestion worker only
-cd server && pnpm run worker:dev
+cd server && npm run worker:dev
 
 # Build frontend
-cd ui && pnpm build
+cd ui && npm run build
 
 # Deploy backend (requires production setup)
-cd server && pnpm run deploy
+cd server && npm run deploy
 ```
 
 ## 🔗 **Connecting Production Services**
