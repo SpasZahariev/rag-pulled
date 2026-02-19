@@ -10,6 +10,7 @@
  */
 
 import { setTimeout as sleep } from 'timers/promises';
+import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,12 +20,16 @@ const __dirname = path.dirname(__filename);
 const BACKUP_INTERVAL = 60000; // 60 seconds
 const EMULATOR_HUB_PORT = 4400; // Default Firebase Emulator Hub port
 const EXPORT_PATH = './data/firebase-emulator';
+const FIREBASE_PROJECT_ID = 'demo-project';
 
 let backupCount = 0;
 let isBackupRunning = false;
 
 /**
- * Export emulator data via REST API
+ * Export emulator data via Firebase CLI.
+ *
+ * Uses a supported command for current firebase-tools versions:
+ *   firebase emulators:export <path> --only auth --force
  */
 async function exportEmulatorData() {
   if (isBackupRunning) {
@@ -36,20 +41,11 @@ async function exportEmulatorData() {
     isBackupRunning = true;
     backupCount++;
     
-    const response = await fetch(`http://localhost:${EMULATOR_HUB_PORT}/emulators/export`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        path: EXPORT_PATH
-      }),
-    });
-
-    if (response.ok) {
+    const result = await runFirebaseExport();
+    if (result.ok) {
       console.log(`💾 Emulator data backed up (#${backupCount}) - ${new Date().toISOString()}`);
     } else {
-      console.warn(`⚠️  Backup failed (HTTP ${response.status}): ${response.statusText}`);
+      console.warn(`⚠️  Backup failed: ${result.error}`);
     }
   } catch (error) {
     // Don't log connection errors during startup - emulator might not be ready yet
@@ -59,6 +55,46 @@ async function exportEmulatorData() {
   } finally {
     isBackupRunning = false;
   }
+}
+
+/**
+ * Runs "firebase emulators:export" using npx.
+ * @returns {Promise<{ok: boolean, error?: string}>}
+ */
+function runFirebaseExport() {
+  return new Promise((resolve, reject) => {
+    const npxBin = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+    const args = [
+      'firebase',
+      'emulators:export',
+      EXPORT_PATH,
+      '--only',
+      'auth',
+      '--force',
+      '--project',
+      FIREBASE_PROJECT_ID
+    ];
+
+    const child = spawn(npxBin, args, {
+      cwd: path.join(__dirname, '..'),
+      stdio: ['ignore', 'ignore', 'pipe']
+    });
+
+    let stderr = '';
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    child.on('error', (error) => reject(error));
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve({ ok: true });
+        return;
+      }
+      const error = stderr.trim() || `export command exited with code ${code}`;
+      resolve({ ok: false, error });
+    });
+  });
 }
 
 /**
