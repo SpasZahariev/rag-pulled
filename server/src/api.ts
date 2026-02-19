@@ -6,6 +6,7 @@ import { authMiddleware } from './middleware/auth';
 import { getDatabase, testDatabaseConnection } from './lib/db';
 import { setEnvContext, clearEnvContext, getDatabaseUrl } from './lib/env';
 import * as schema from './schema/users';
+import { getAllowedUploadExtensions, saveFilesToTempStorage } from './lib/upload-storage';
 
 type Env = {
   RUNTIME?: string;
@@ -102,6 +103,52 @@ protectedRoutes.get('/me', (c) => {
     },
     message: 'You are authenticated!',
   });
+});
+
+protectedRoutes.post('/uploads', async (c) => {
+  try {
+    const user = c.get('user');
+    const formData = await c.req.formData();
+    const filesFieldEntries = formData.getAll('files');
+    const singleFileEntry = formData.get('file');
+    const candidateEntries = singleFileEntry
+      ? [...filesFieldEntries, singleFileEntry]
+      : filesFieldEntries;
+
+    const files: File[] = [];
+    for (const entry of candidateEntries) {
+      if (typeof entry !== 'string') {
+        files.push(entry);
+      }
+    }
+
+    if (files.length === 0) {
+      return c.json({
+        error: 'No files were provided. Use "file" or "files" multipart fields.',
+        allowedExtensions: getAllowedUploadExtensions(),
+      }, 400);
+    }
+
+    const uploadResult = await saveFilesToTempStorage(user.id, files);
+
+    if (uploadResult.uploadedFiles.length === 0) {
+      return c.json({
+        message: 'No valid files were uploaded. See rejectedFiles for details.',
+        ...uploadResult,
+      }, 200);
+    }
+
+    return c.json({
+      message: 'Files uploaded to temporary storage',
+      ...uploadResult,
+    }, 201);
+  } catch (error) {
+    console.error('Upload route error:', error);
+    return c.json({
+      error: 'Failed to process uploaded files',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    }, 500);
+  }
 });
 
 // Mount the protected routes under /protected

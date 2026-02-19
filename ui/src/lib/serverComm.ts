@@ -74,6 +74,36 @@ export async function getCurrentUser(): Promise<{
   return response.json();
 }
 
+export interface UploadedFileResult {
+  originalName: string;
+  storedName: string;
+  storedPath: string;
+  sizeBytes: number;
+  mimeType: string;
+  uploadedAt: string;
+}
+
+export interface RejectedFileResult {
+  originalName: string;
+  reason: string;
+}
+
+export interface UploadFilesResponse {
+  message: string;
+  uploadSessionId: string;
+  uploadedFiles: UploadedFileResult[];
+  rejectedFiles: RejectedFileResult[];
+}
+
+export async function uploadFiles(formData: FormData): Promise<UploadFilesResponse> {
+  const response = await fetchWithAuth('/api/v1/protected/uploads', {
+    method: 'POST',
+    body: formData,
+  });
+
+  return response.json();
+}
+
 // Example of how to add more API endpoints:
 // export async function createChat(data: CreateChatData) {
 //   const response = await fetchWithAuth('/api/v1/protected/chats', {
@@ -88,5 +118,6 @@ export async function getCurrentUser(): Promise<{
 
 export const api = {
   getCurrentUser,
+  uploadFiles,
   // Add other API endpoints here
 }; 

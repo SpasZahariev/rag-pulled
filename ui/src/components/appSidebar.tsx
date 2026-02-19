@@ -3,6 +3,7 @@ import {
   Settings, 
   FileText,
   Layers,
+  Upload,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -50,6 +51,14 @@ export function AppSidebar() {
                   <Link to="/page2">
                     <Layers className="w-4 h-4" />
                     <span>Page 2</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Upload Data" isActive={isActive('/upload')} asChild>
+                  <Link to="/upload">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Data</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
