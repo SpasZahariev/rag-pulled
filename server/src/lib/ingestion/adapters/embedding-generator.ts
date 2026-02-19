@@ -1,4 +1,6 @@
 import type { EmbeddingResult } from '../types';
+import { getOllamaEmbeddingModel } from '../../env';
+import { ollamaEmbed } from '../ollama-client';
 
 export interface EmbeddingGenerator {
   id: string;
@@ -30,11 +32,41 @@ class DeterministicEmbeddingGenerator implements EmbeddingGenerator {
   }
 }
 
+class OllamaEmbeddingGenerator implements EmbeddingGenerator {
+  id = 'ollama-emb-v1';
+  dimensions = 0;
+  private readonly model = getOllamaEmbeddingModel();
+
+  async embed(input: string): Promise<EmbeddingResult> {
+    try {
+      const vector = await ollamaEmbed(this.model, input);
+      this.dimensions = vector.length;
+
+      return {
+        model: this.model,
+        dimensions: vector.length,
+        vector,
+      };
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown embedding failure';
+      console.error(
+        `[ingestion][embedding] provider=${this.id} model=${this.model} failed: ${reason}`
+      );
+      throw new Error(
+        `Embedding generation failed for provider "${this.id}" and model "${this.model}": ${reason}`
+      );
+    }
+  }
+}
+
 export function createEmbeddingGenerator(providerId: string): EmbeddingGenerator {
+  if (providerId === 'ollama-emb-v1') {
+    return new OllamaEmbeddingGenerator();
+  }
+
   if (providerId === 'deterministic-emb-v1') {
     return new DeterministicEmbeddingGenerator();
   }
 
-  // Pipeline-first default: unknown providers fall back to deterministic adapter.
-  return new DeterministicEmbeddingGenerator();
+  throw new Error(`Unknown embedding provider "${providerId}"`);
 }

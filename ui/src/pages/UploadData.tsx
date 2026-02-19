@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { api, type UploadFilesResponse, type UploadJobStatusResponse } from '@/lib/serverComm';
 
-const ACCEPTED_EXTENSIONS = '.csv,.pdf,.md,.markdown,.xls,.xlsx';
+const ACCEPTED_EXTENSIONS = '.csv,.pdf,.txt,.json,.xml,.html,.md,.markdown,.doc,.docx,.xls,.xlsx';
 const TERMINAL_JOB_STATUSES = new Set(['completed', 'failed']);
 
 export function UploadData() {
@@ -124,7 +124,7 @@ export function UploadData() {
         <div>
           <h1 className="text-3xl font-bold">Upload Data</h1>
           <p className="text-muted-foreground">
-            Upload CSV, PDF, Markdown, and Excel files to temporary backend storage.
+            Upload CSV, PDF, TXT, JSON, XML, HTML, Markdown, Word, and Excel files to temporary backend storage.
           </p>
         </div>
 
@@ -163,7 +163,7 @@ export function UploadData() {
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">Click to choose files</p>
                       <p className="text-xs text-muted-foreground">
-                        CSV, PDF, Markdown, and Excel formats are supported.
+                        CSV, PDF, TXT, JSON, XML, HTML, Markdown, Word, and Excel formats are supported.
                       </p>
                     </div>
                   </div>

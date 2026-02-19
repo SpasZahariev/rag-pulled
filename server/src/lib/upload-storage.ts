@@ -1,18 +1,24 @@
 import { randomUUID } from 'node:crypto';
-import { extname, join, basename } from 'node:path';
+import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureDir, writeFile } from 'fs-extra';
 
 const ALLOWED_EXTENSIONS = new Set([
   '.csv',
   '.pdf',
+  '.txt',
+  '.json',
+  '.xml',
+  '.html',
   '.md',
   '.markdown',
+  '.doc',
+  '.docx',
   '.xls',
   '.xlsx',
 ]);
 
-const serverRootDir = fileURLToPath(new URL('../..', import.meta.url));
+const serverRootDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 export interface UploadedFileMetadata {
   originalName: string;

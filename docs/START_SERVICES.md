@@ -15,7 +15,7 @@ Use this guide for local development startup commands.
 From repo root:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 This starts all services together and streams logs in one terminal with service prefixes.
@@ -25,11 +25,11 @@ This starts all services together and streams logs in one terminal with service 
 If you want one command and separate logs per service terminal:
 
 ```bash
-tmux new-session -d -s rag-dev -n database "cd /home/spas/dev/js-projects/rag-pulled/database-server && npm run dev -- --port 5502" \; \
-new-window -n firebase "cd /home/spas/dev/js-projects/rag-pulled && npm run firebase:emulator" \; \
-new-window -n api "cd /home/spas/dev/js-projects/rag-pulled/server && npm run dev -- --port 5500" \; \
-new-window -n worker "cd /home/spas/dev/js-projects/rag-pulled/server && npm run worker:dev" \; \
-new-window -n ui "cd /home/spas/dev/js-projects/rag-pulled/ui && npm run dev -- --port 5501 --api-url http://localhost:5500 --use-firebase-emulator true --firebase-auth-port 5503" \; \
+tmux new-session -d -s rag-dev -n database "cd /home/spas/dev/js-projects/rag-pulled/database-server && pnpm run dev -- --port 5502" \; \
+new-window -n firebase "cd /home/spas/dev/js-projects/rag-pulled && pnpm run firebase:emulator" \; \
+new-window -n api "cd /home/spas/dev/js-projects/rag-pulled/server && pnpm run dev -- --port 5500" \; \
+new-window -n worker "cd /home/spas/dev/js-projects/rag-pulled/server && pnpm run worker:dev" \; \
+new-window -n ui "cd /home/spas/dev/js-projects/rag-pulled/ui && pnpm run dev -- --port 5501 --api-url http://localhost:5500 --use-firebase-emulator true --firebase-auth-port 5503" \; \
 select-window -t rag-dev:api \; attach -t rag-dev
 ```
 
@@ -48,35 +48,35 @@ Open 5 terminals and run these commands in order.
 
 ```bash
 cd /home/spas/dev/js-projects/rag-pulled/database-server
-npm run dev -- --port 5502
+pnpm run dev -- --port 5502
 ```
 
 ### Terminal 2 - Firebase Auth emulator
 
 ```bash
 cd /home/spas/dev/js-projects/rag-pulled
-npm run firebase:emulator
+pnpm run firebase:emulator
 ```
 
 ### Terminal 3 - Backend API
 
 ```bash
 cd /home/spas/dev/js-projects/rag-pulled/server
-npm run dev -- --port 5500
+pnpm run dev -- --port 5500
 ```
 
 ### Terminal 4 - Ingestion worker
 
 ```bash
 cd /home/spas/dev/js-projects/rag-pulled/server
-npm run worker:dev
+pnpm run worker:dev
 ```
 
 ### Terminal 5 - Frontend
 
 ```bash
 cd /home/spas/dev/js-projects/rag-pulled/ui
-npm run dev -- --port 5501 --api-url http://localhost:5500 --use-firebase-emulator true --firebase-auth-port 5503
+pnpm run dev -- --port 5501 --api-url http://localhost:5500 --use-firebase-emulator true --firebase-auth-port 5503
 ```
 
 ## Manual mode required env values
@@ -89,4 +89,4 @@ FIREBASE_PROJECT_ID=demo-project
 FIREBASE_AUTH_EMULATOR_HOST=localhost:5503
 ```
 
-`npm run dev` (Option A) auto-manages dynamic ports. Manual mode uses fixed ports from this document.
+`pnpm run dev` (Option A) auto-manages dynamic ports. Manual mode uses fixed ports from this document.

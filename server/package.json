@@ -19,7 +19,10 @@
     "fs-extra": "^11.2.0",
     "hono": "^4.0.5",
     "jose": "^5.2.3",
-    "postgres": "^3.4.7"
+    "mammoth": "^1.11.0",
+    "pdf-parse": "^2.4.5",
+    "postgres": "^3.4.7",
+    "word-extractor": "^1.0.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240208.0",

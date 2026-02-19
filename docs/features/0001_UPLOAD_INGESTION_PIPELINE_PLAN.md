@@ -46,7 +46,7 @@ Build an end-to-end backend pipeline for the uploaded files from the Upload Data
   - claim jobs atomically (single-row lock/update) to avoid double-processing
   - process each document sequentially per job
   - retry with exponential backoff until `max_attempts`, then mark `failed`
-- Add npm script in [`/home/spas/dev/js-projects/rag-pulled/server/package.json`](/home/spas/dev/js-projects/rag-pulled/server/package.json) for worker (`pnpm run worker:dev`), and optionally wire root [`/home/spas/dev/js-projects/rag-pulled/scripts/run-dev.js`](/home/spas/dev/js-projects/rag-pulled/scripts/run-dev.js) to launch worker alongside backend/frontend in local dev.
+- Add a package script in [`/home/spas/dev/js-projects/rag-pulled/server/package.json`](/home/spas/dev/js-projects/rag-pulled/server/package.json) for worker (`pnpm run worker:dev`), and optionally wire root [`/home/spas/dev/js-projects/rag-pulled/scripts/run-dev.js`](/home/spas/dev/js-projects/rag-pulled/scripts/run-dev.js) to launch worker alongside backend/frontend in local dev.
 
 ### 6) Processing algorithm (pipeline-first adapter architecture)
 

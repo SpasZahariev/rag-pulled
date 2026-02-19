@@ -80,11 +80,39 @@ export function getAllowAnonymousUsers(): boolean {
 }
 
 export function getDocumentStructurerProvider(): string {
-  return getEnv('DOCUMENT_STRUCTURER_PROVIDER', 'deterministic-v1')!;
+  return getEnv('DOCUMENT_STRUCTURER_PROVIDER', 'ollama-structurer-v1')!;
 }
 
 export function getEmbeddingProvider(): string {
-  return getEnv('EMBEDDING_PROVIDER', 'deterministic-emb-v1')!;
+  return getEnv('EMBEDDING_PROVIDER', 'ollama-emb-v1')!;
+}
+
+export function getOllamaBaseUrl(): string {
+  return getEnv('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')!;
+}
+
+export function getOllamaEmbeddingModel(): string {
+  return getEnv('OLLAMA_EMBEDDING_MODEL', 'mxbai-embed-large')!;
+}
+
+export function getOllamaStructurerModel(): string {
+  return getEnv('OLLAMA_STRUCTURER_MODEL', 'qwen2.5:14b-instruct')!;
+}
+
+export function getOllamaTemperature(): number {
+  const raw = getEnv('OLLAMA_TEMPERATURE', '0');
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function getOllamaNumCtx(): number | undefined {
+  const raw = getEnv('OLLAMA_NUM_CTX');
+  if (!raw) {
+    return undefined;
+  }
+
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 /**

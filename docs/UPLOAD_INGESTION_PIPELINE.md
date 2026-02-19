@@ -15,15 +15,23 @@ This project now processes uploaded files asynchronously after they are accepted
 
 ## Current implementation scope
 
-This is a pipeline-first implementation:
+This is a local-model implementation:
 
 - Queue + orchestration are fully implemented with Postgres.
 - Structuring + embedding providers are pluggable adapters.
-- Default adapters are deterministic local placeholders for end-to-end flow validation.
-- Supported structurer inputs today:
+- Default providers use Ollama large models with no fallback model substitution.
+- Accepted upload file extensions:
+  - `.csv`, `.pdf`, `.txt`, `.json`, `.xml`, `.html`, `.md`, `.markdown`, `.doc`, `.docx`, `.xls`, `.xlsx`
+- Supported structurer inputs:
   - `.csv`
+  - `.txt`
+  - `.json`
+  - `.xml`
+  - `.html`
   - `.md` / `.markdown`
-- `.pdf`, `.xls`, and `.xlsx` are accepted at upload time but currently marked as unsupported by the placeholder structurer.
+  - `.pdf`
+  - `.doc` / `.docx`
+- `.xls` / `.xlsx` are accepted at upload time but currently not extracted by the local structurer.
 
 ## API endpoints
 
@@ -36,6 +44,7 @@ This is a pipeline-first implementation:
   - `uploadSessionId`
   - `jobId`
   - `status` (`queued`)
+  - `supportedExtensions[]`
   - `uploadedFiles[]`
   - `rejectedFiles[]`
 
@@ -77,10 +86,22 @@ pnpm db:push
 
 ## Environment variables
 
-Add these to your server environment file if you want to customize providers/worker polling:
+Add these to your server environment file:
 
-- `DOCUMENT_STRUCTURER_PROVIDER` (default: `deterministic-v1`)
-- `EMBEDDING_PROVIDER` (default: `deterministic-emb-v1`)
+- `DOCUMENT_STRUCTURER_PROVIDER` (default: `ollama-structurer-v1`)
+- `EMBEDDING_PROVIDER` (default: `ollama-emb-v1`)
+- `OLLAMA_BASE_URL` (default: `http://127.0.0.1:11434`)
+- `OLLAMA_STRUCTURER_MODEL` (default: `qwen2.5:14b-instruct`)
+- `OLLAMA_EMBEDDING_MODEL` (default: `mxbai-embed-large`)
+- `OLLAMA_TEMPERATURE` (default: `0`)
+- `OLLAMA_NUM_CTX` (optional context window override)
 - `INGESTION_WORKER_POLL_MS` (default: `2000`)
 
-If unset, defaults are used.
+Model setup:
+
+```bash
+ollama pull qwen2.5:14b-instruct
+ollama pull mxbai-embed-large
+```
+
+If either configured model cannot execute, ingestion logs a provider/model-specific error and marks the job for retry/failure according to queue policy.

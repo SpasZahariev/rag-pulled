@@ -135,6 +135,7 @@ protectedRoutes.post('/uploads', async (c) => {
     if (uploadResult.uploadedFiles.length === 0) {
       return c.json({
         message: 'No valid files were uploaded. See rejectedFiles for details.',
+        supportedExtensions: getAllowedUploadExtensions(),
         ...uploadResult,
       }, 200);
     }
@@ -149,6 +150,7 @@ protectedRoutes.post('/uploads', async (c) => {
       message: 'Files uploaded and queued for processing',
       jobId,
       status: 'queued',
+      supportedExtensions: getAllowedUploadExtensions(),
       ...uploadResult,
     }, 201);
   } catch (error) {

@@ -39,7 +39,7 @@ Start with everything running locally on your machine, then progressively connec
 Start both frontend and backend (with embedded PostgreSQL database and Firebase emulator):
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 For all startup flows in one place (single command, split logs, manual per-terminal), use:
@@ -56,24 +56,26 @@ The system handles port conflicts automatically. For multiple projects, use sepa
 > **📋 Port Management**: See [`docs/PORT_HANDLING.md`](docs/PORT_HANDLING.md) for details on running multiple instances and port conflict resolution.
 >
 > **📄 Upload Ingestion**: See [`docs/UPLOAD_INGESTION_PIPELINE.md`](docs/UPLOAD_INGESTION_PIPELINE.md) for the async upload to structure to embedding flow.
+>
+> **🧠 Local AI Ingestion**: Upload processing uses local Ollama models for structuring and embeddings by default (`qwen2.5:14b-instruct` + `mxbai-embed-large`).
 
 ### Individual Commands
 
 ```bash
 # Frontend only
-cd ui && npm run dev
+cd ui && pnpm run dev
 
 # Backend only  
-cd server && npm run dev
+cd server && pnpm run dev
 
 # Ingestion worker only
-cd server && npm run worker:dev
+cd server && pnpm run worker:dev
 
 # Build frontend
-cd ui && npm run build
+cd ui && pnpm run build
 
 # Deploy backend (requires production setup)
-cd server && npm run deploy
+cd server && pnpm run deploy
 ```
 
 ## 🔗 **Connecting Production Services**

@@ -93,6 +93,7 @@ export interface UploadFilesResponse {
   uploadSessionId: string;
   jobId?: string;
   status?: 'queued' | 'processing_structure' | 'processing_embeddings' | 'completed' | 'failed';
+  supportedExtensions?: string[];
   uploadedFiles: UploadedFileResult[];
   rejectedFiles: RejectedFileResult[];
 }

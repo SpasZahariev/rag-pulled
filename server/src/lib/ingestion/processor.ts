@@ -19,6 +19,9 @@ export async function processIngestionJob(jobId: string): Promise<void> {
     const documents = await getDocumentsForJob(jobId);
     const structurer = createDocumentStructurer(getDocumentStructurerProvider());
     const embeddingGenerator = createEmbeddingGenerator(getEmbeddingProvider());
+    console.log(
+      `[worker] Processing job ${jobId} with structurer=${structurer.id} embedding=${embeddingGenerator.id}`
+    );
 
     for (const document of documents) {
       await markDocumentStructuredStatus(document.id, 'processing');
