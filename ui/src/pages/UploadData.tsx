@@ -1,17 +1,19 @@
-import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Upload, FileText, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { api, type UploadFilesResponse } from '@/lib/serverComm';
+import { api, type UploadFilesResponse, type UploadJobStatusResponse } from '@/lib/serverComm';
 
 const ACCEPTED_EXTENSIONS = '.csv,.pdf,.md,.markdown,.xls,.xlsx';
+const TERMINAL_JOB_STATUSES = new Set(['completed', 'failed']);
 
 export function UploadData() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<UploadFilesResponse | null>(null);
+  const [jobStatus, setJobStatus] = useState<UploadJobStatusResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const acceptedExtensionsList = useMemo(
@@ -35,8 +37,54 @@ export function UploadData() {
   const resetSelection = () => {
     setSelectedFiles([]);
     setUploadResult(null);
+    setJobStatus(null);
     setErrorMessage('');
   };
+
+  useEffect(() => {
+    if (!uploadResult?.jobId) {
+      return;
+    }
+    const currentJobId = uploadResult.jobId;
+
+    let isCancelled = false;
+    let pollHandle: ReturnType<typeof setInterval> | null = null;
+
+    const pollStatus = async () => {
+      try {
+        const statusResponse = await api.getUploadJobStatus(currentJobId);
+        if (isCancelled) {
+          return;
+        }
+
+        setJobStatus(statusResponse);
+        if (TERMINAL_JOB_STATUSES.has(statusResponse.status)) {
+          if (pollHandle) {
+            clearInterval(pollHandle);
+            pollHandle = null;
+          }
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setErrorMessage(
+            error instanceof Error ? error.message : 'Failed to fetch processing status.'
+          );
+        }
+      }
+    };
+
+    void pollStatus();
+    pollHandle = setInterval(() => {
+      void pollStatus();
+    }, 2000);
+
+    return () => {
+      isCancelled = true;
+      if (pollHandle) {
+        clearInterval(pollHandle);
+      }
+    };
+  }, [uploadResult?.jobId]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,6 +97,7 @@ export function UploadData() {
     try {
       setIsUploading(true);
       setUploadResult(null);
+      setJobStatus(null);
       setErrorMessage('');
 
       const formData = new FormData();
@@ -190,8 +239,21 @@ export function UploadData() {
               <CardDescription>
                 Session ID: <span className="font-mono">{uploadResult.uploadSessionId}</span>
               </CardDescription>
+              <CardDescription>
+                Job ID: <span className="font-mono">{uploadResult.jobId ?? 'N/A'}</span>
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
+              <div>
+                <p className="font-medium">Processing status</p>
+                <p className="text-muted-foreground mt-1">
+                  {jobStatus ? jobStatus.status : uploadResult.status ?? 'not_queued'}
+                </p>
+                {jobStatus?.error ? (
+                  <p className="text-destructive mt-1">Error: {jobStatus.error}</p>
+                ) : null}
+              </div>
+
               <div>
                 <p className="font-medium">Accepted files ({uploadResult.uploadedFiles.length})</p>
                 <div className="mt-2 space-y-2">
@@ -212,6 +274,23 @@ export function UploadData() {
                       <div key={`${file.originalName}-${index}`} className="rounded-md border p-2">
                         <p>{file.originalName}</p>
                         <p className="text-muted-foreground">Reason: {file.reason}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {jobStatus ? (
+                <div>
+                  <p className="font-medium">Document processing details ({jobStatus.documents.length})</p>
+                  <div className="mt-2 space-y-2">
+                    {jobStatus.documents.map((document) => (
+                      <div key={document.id} className="rounded-md border p-2">
+                        <p>{document.originalName}</p>
+                        <p className="text-muted-foreground">Status: {document.structuredStatus}</p>
+                        {document.error ? (
+                          <p className="text-destructive">Error: {document.error}</p>
+                        ) : null}
                       </div>
                     ))}
                   </div>

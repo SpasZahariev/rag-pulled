@@ -91,8 +91,31 @@ export interface RejectedFileResult {
 export interface UploadFilesResponse {
   message: string;
   uploadSessionId: string;
+  jobId?: string;
+  status?: 'queued' | 'processing_structure' | 'processing_embeddings' | 'completed' | 'failed';
   uploadedFiles: UploadedFileResult[];
   rejectedFiles: RejectedFileResult[];
+}
+
+export interface UploadJobDocumentStatus {
+  id: string;
+  originalName: string;
+  storedPath: string;
+  mimeType: string;
+  structuredStatus: 'pending' | 'processing' | 'structured' | 'unsupported' | 'failed';
+  error: string | null;
+}
+
+export interface UploadJobStatusResponse {
+  jobId: string;
+  uploadSessionId: string;
+  status: 'queued' | 'processing_structure' | 'processing_embeddings' | 'completed' | 'failed';
+  attemptCount: number;
+  maxAttempts: number;
+  error: string | null;
+  documents: UploadJobDocumentStatus[];
+  updatedAt: string;
+  createdAt: string;
 }
 
 export async function uploadFiles(formData: FormData): Promise<UploadFilesResponse> {
@@ -101,6 +124,11 @@ export async function uploadFiles(formData: FormData): Promise<UploadFilesRespon
     body: formData,
   });
 
+  return response.json();
+}
+
+export async function getUploadJobStatus(jobId: string): Promise<UploadJobStatusResponse> {
+  const response = await fetchWithAuth(`/api/v1/protected/uploads/${jobId}/status`);
   return response.json();
 }
 
@@ -119,5 +147,6 @@ export async function uploadFiles(formData: FormData): Promise<UploadFilesRespon
 export const api = {
   getCurrentUser,
   uploadFiles,
+  getUploadJobStatus,
   // Add other API endpoints here
 }; 

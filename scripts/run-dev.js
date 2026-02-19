@@ -247,6 +247,7 @@ async function startServices() {
       commands.push(`"cd server && wrangler dev --local-protocol http"`);
     } else {
       commands.push(`"cd server && pnpm run dev -- --port ${availablePorts.backend}"`);
+      commands.push(`"cd server && pnpm run worker:dev"`);
     }
     
     // Add frontend server
@@ -299,6 +300,10 @@ async function startServices() {
     }
     serviceNames.push('server');
     serviceColors.push('magenta');
+    if (!cliArgs.useWrangler) {
+      serviceNames.push('worker');
+      serviceColors.push('white');
+    }
     serviceNames.push('frontend');
     serviceColors.push('green');
 

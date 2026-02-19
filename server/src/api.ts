@@ -7,6 +7,7 @@ import { getDatabase, testDatabaseConnection } from './lib/db';
 import { setEnvContext, clearEnvContext, getDatabaseUrl } from './lib/env';
 import * as schema from './schema/users';
 import { getAllowedUploadExtensions, saveFilesToTempStorage } from './lib/upload-storage';
+import { enqueueIngestionJob, getIngestionJobWithDocuments } from './lib/ingestion/queue';
 
 type Env = {
   RUNTIME?: string;
@@ -138,8 +139,16 @@ protectedRoutes.post('/uploads', async (c) => {
       }, 200);
     }
 
+    const { jobId } = await enqueueIngestionJob(
+      user.id,
+      uploadResult.uploadSessionId,
+      uploadResult.uploadedFiles
+    );
+
     return c.json({
-      message: 'Files uploaded to temporary storage',
+      message: 'Files uploaded and queued for processing',
+      jobId,
+      status: 'queued',
       ...uploadResult,
     }, 201);
   } catch (error) {
@@ -148,6 +157,51 @@ protectedRoutes.post('/uploads', async (c) => {
       error: 'Failed to process uploaded files',
       details: error instanceof Error ? error.message : 'Unknown error',
     }, 500);
+  }
+});
+
+protectedRoutes.get('/uploads/:jobId/status', async (c) => {
+  try {
+    const user = c.get('user');
+    const jobId = c.req.param('jobId');
+
+    if (!jobId) {
+      return c.json({ error: 'Job ID is required' }, 400);
+    }
+
+    const result = await getIngestionJobWithDocuments(jobId, user.id);
+
+    if (!result) {
+      return c.json({ error: 'Job not found' }, 404);
+    }
+
+    return c.json({
+      jobId: result.job.id,
+      uploadSessionId: result.job.upload_session_id,
+      status: result.job.status,
+      attemptCount: result.job.attempt_count,
+      maxAttempts: result.job.max_attempts,
+      error: result.job.error,
+      documents: result.documents.map((document) => ({
+        id: document.id,
+        originalName: document.original_name,
+        storedPath: document.stored_path,
+        mimeType: document.mime_type,
+        structuredStatus: document.structured_status,
+        error: document.error,
+      })),
+      updatedAt: result.job.updated_at,
+      createdAt: result.job.created_at,
+    });
+  } catch (error) {
+    console.error('Upload status route error:', error);
+    return c.json(
+      {
+        error: 'Failed to fetch upload job status',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    );
   }
 });
 

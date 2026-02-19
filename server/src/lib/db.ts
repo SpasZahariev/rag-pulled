@@ -2,7 +2,19 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { drizzle as createDrizzlePostgres } from 'drizzle-orm/postgres-js';
 import { neon } from '@neondatabase/serverless';
 import postgres from 'postgres';
-import * as schema from '../schema/users';
+import * as userSchema from '../schema/users';
+import * as ingestionJobSchema from '../schema/ingestion-jobs';
+import * as uploadedDocumentSchema from '../schema/uploaded-documents';
+import * as documentChunkSchema from '../schema/document-chunks';
+import * as chunkEmbeddingSchema from '../schema/chunk-embeddings';
+
+const schema = {
+  ...userSchema,
+  ...ingestionJobSchema,
+  ...uploadedDocumentSchema,
+  ...documentChunkSchema,
+  ...chunkEmbeddingSchema,
+};
 
 type DatabaseConnection = ReturnType<typeof drizzle> | ReturnType<typeof createDrizzlePostgres>;
 

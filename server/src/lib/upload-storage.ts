@@ -49,6 +49,10 @@ export function getAllowedUploadExtensions(): string[] {
   return Array.from(ALLOWED_EXTENSIONS.values());
 }
 
+export function resolveStoredPathToAbsolutePath(storedPath: string): string {
+  return join(serverRootDir, storedPath);
+}
+
 export async function saveFilesToTempStorage(
   userId: string,
   files: File[]

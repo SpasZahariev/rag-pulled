@@ -50,6 +50,8 @@ This automatically assigns available ports and displays them on startup:
 The system handles port conflicts automatically. For multiple projects, use separate folders.
 
 > **📋 Port Management**: See [`docs/PORT_HANDLING.md`](docs/PORT_HANDLING.md) for details on running multiple instances and port conflict resolution.
+>
+> **📄 Upload Ingestion**: See [`docs/UPLOAD_INGESTION_PIPELINE.md`](docs/UPLOAD_INGESTION_PIPELINE.md) for the async upload to structure to embedding flow.
 
 ### Individual Commands
 
@@ -59,6 +61,9 @@ cd ui && pnpm dev
 
 # Backend only  
 cd server && pnpm dev
+
+# Ingestion worker only
+cd server && pnpm run worker:dev
 
 # Build frontend
 cd ui && pnpm build
@@ -118,6 +123,7 @@ pnpm connection:status
 │   ├── src/
 │   │   ├── middleware/   # Auth & other middleware
 │   │   ├── schema/       # Database schema (Drizzle)
+│   │   ├── lib/ingestion/ # Upload queue, worker processing, and adapters
 │   │   └── index.ts      # API routes
 │   ├── wrangler.toml     # Cloudflare Worker config (when connected)
 │   ├── .env              # Your environmental variables
@@ -258,6 +264,15 @@ export const users = pgTable('users', {
 1. Create schema file in `server/src/schema/`
 2. Export from main schema file
 3. Push to database: `cd server && pnpm db:push`
+
+### Upload Ingestion Tables
+
+The async upload ingestion pipeline persists processing state in:
+
+- `app.ingestion_jobs`
+- `app.uploaded_documents`
+- `app.document_chunks`
+- `app.chunk_embeddings`
 
 ## 📚 **Learning Resources**
 

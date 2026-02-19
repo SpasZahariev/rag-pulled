@@ -79,6 +79,14 @@ export function getAllowAnonymousUsers(): boolean {
   return getEnv('ALLOW_ANONYMOUS_USERS') !== 'false';
 }
 
+export function getDocumentStructurerProvider(): string {
+  return getEnv('DOCUMENT_STRUCTURER_PROVIDER', 'deterministic-v1')!;
+}
+
+export function getEmbeddingProvider(): string {
+  return getEnv('EMBEDDING_PROVIDER', 'deterministic-emb-v1')!;
+}
+
 /**
  * For Node.js environments - get process.env
  */

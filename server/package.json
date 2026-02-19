@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "worker:dev": "tsx watch src/worker.ts",
     "deploy": "npm run deploy:cf",
     "deploy:cf": "node scripts/deploy-cloudflare.js",
     "test": "vitest",
