@@ -23,7 +23,9 @@ export function UploadData() {
 
   const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextFiles = Array.from(event.target.files || []);
-    setSelectedFiles(nextFiles);
+    setSelectedFiles((currentFiles) => [...currentFiles, ...nextFiles]);
+    // Clear the native input so selecting the same file again still triggers onChange.
+    event.target.value = '';
     setUploadResult(null);
     setErrorMessage('');
   };

@@ -78,6 +78,18 @@ cd ui && pnpm run build
 cd server && pnpm run deploy
 ```
 
+### Connect with psql
+
+Use `psql` to inspect the embedded local PostgreSQL database:
+
+```bash
+# Fixed manual port
+psql "postgresql://postgres:password@localhost:5502/postgres"
+
+# Dynamic port from current server/.env
+psql "$(rg '^DATABASE_URL=' /home/spas/dev/js-projects/rag-pulled/server/.env | sed 's/^DATABASE_URL=//')"
+```
+
 ## 🔗 **Connecting Production Services**
 
 Your app defaults to everything running locally. Connect to production services when you're ready:

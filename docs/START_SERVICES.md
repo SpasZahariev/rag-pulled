@@ -90,3 +90,17 @@ FIREBASE_AUTH_EMULATOR_HOST=localhost:5503
 ```
 
 `pnpm run dev` (Option A) auto-manages dynamic ports. Manual mode uses fixed ports from this document.
+
+## Connect with psql
+
+If you are using manual mode (fixed port), connect with:
+
+```bash
+psql "postgresql://postgres:password@localhost:5502/postgres"
+```
+
+If you are using `pnpm run dev` (dynamic ports), connect using the current `DATABASE_URL`:
+
+```bash
+psql "$(rg '^DATABASE_URL=' /home/spas/dev/js-projects/rag-pulled/server/.env | sed 's/^DATABASE_URL=//')"
+```

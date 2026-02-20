@@ -19,10 +19,36 @@ export function isSupportedExtractionExtension(filePath: string): boolean {
 
 async function extractPdfText(filePath: string): Promise<string> {
   const pdfParseModule: any = await import('pdf-parse');
-  const pdfParse = pdfParseModule.default ?? pdfParseModule;
   const buffer = await readFile(filePath);
-  const result = await pdfParse(buffer);
-  return typeof result?.text === 'string' ? result.text : '';
+
+  // pdf-parse v1 exports a callable default function. v2+ exports PDFParse class.
+  const pdfParse = pdfParseModule.default ?? pdfParseModule;
+  if (typeof pdfParse === 'function') {
+    const result = await pdfParse(buffer);
+    return typeof result?.text === 'string' ? result.text : '';
+  }
+
+  const PDFParseCtor = pdfParseModule.PDFParse;
+  if (typeof PDFParseCtor === 'function') {
+    const parser = new PDFParseCtor({ data: buffer });
+    try {
+      if (typeof parser.getText === 'function') {
+        const result = await parser.getText();
+        return typeof result?.text === 'string' ? result.text : '';
+      }
+
+      if (typeof parser.getRaw === 'function') {
+        const result = await parser.getRaw();
+        return typeof result?.text === 'string' ? result.text : '';
+      }
+    } finally {
+      if (typeof parser.destroy === 'function') {
+        await parser.destroy();
+      }
+    }
+  }
+
+  throw new Error('Unsupported pdf-parse module API');
 }
 
 async function extractDocxText(filePath: string): Promise<string> {
@@ -33,12 +59,47 @@ async function extractDocxText(filePath: string): Promise<string> {
 }
 
 async function extractDocText(filePath: string): Promise<string> {
-  const extractorModule: any = await import('word-extractor');
-  const WordExtractor = extractorModule.default ?? extractorModule;
-  const extractor = new WordExtractor();
-  const extracted = await extractor.extract(filePath);
-  const body = extracted?.getBody?.();
-  return typeof body === 'string' ? body : '';
+  try {
+    const extractorModule: any = await import('word-extractor');
+    const WordExtractor = extractorModule.default ?? extractorModule;
+    const extractor = new WordExtractor();
+    const extracted = await extractor.extract(filePath);
+    const body = extracted?.getBody?.();
+    if (typeof body === 'string' && body.trim().length > 0) {
+      return body;
+    }
+  } catch {
+    // Some .doc fixtures are plain text saved with a .doc suffix.
+  }
+
+  const rawBuffer = await readFile(filePath);
+  if (looksLikePlainText(rawBuffer)) {
+    return rawBuffer.toString('utf8');
+  }
+
+  throw new Error('Unable to read this type of file');
+}
+
+function looksLikePlainText(buffer: Buffer): boolean {
+  if (buffer.length === 0) {
+    return true;
+  }
+
+  // Null bytes usually indicate a binary document format.
+  if (buffer.includes(0)) {
+    return false;
+  }
+
+  let printable = 0;
+  for (const byte of buffer) {
+    const isLineBreak = byte === 10 || byte === 13 || byte === 9;
+    const isAsciiPrintable = byte >= 32 && byte <= 126;
+    if (isLineBreak || isAsciiPrintable) {
+      printable += 1;
+    }
+  }
+
+  return printable / buffer.length > 0.85;
 }
 
 export async function extractTextFromFile(filePath: string): Promise<string> {
