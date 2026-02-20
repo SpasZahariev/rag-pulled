@@ -4,6 +4,7 @@ import {
   getOpenCodeZenMaxTokens,
   getOpenCodeZenTemperature,
 } from '../env';
+import { logger } from '../logger';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -114,7 +115,7 @@ function normalizeOpenCodeBaseUrl(rawBaseUrl: string): NormalizedOpenCodeBaseUrl
     // Docs specify the OpenAI-compatible endpoint for MiniMax:
     // https://opencode.ai/zen/v1/chat/completions
     if (host === 'api.opencode.ai') {
-      console.warn(
+      logger.warn(
         `[ingestion][opencode] normalized_base_url from="${from}" to="opencode.ai/zen/v1/chat/completions"`
       );
       return { baseUrl: fallbackBaseUrl, chatCompletionsPath: fallbackPath };
@@ -278,7 +279,7 @@ export async function openCodeZenGenerateJson(
       const details = extractOpenCodeErrorDetails(result.error);
       const statusError = `HTTP ${result.response.status} ${result.response.statusText}`.trim();
       // Log upstream API status/error fields to make debugging provider failures easier.
-      console.error(
+      logger.error(
         `[ingestion][opencode] request_failed status=${result.response.status} statusText="${result.response.statusText}" code="${details.code ?? 'unknown'}" type="${details.type ?? 'unknown'}" message="${details.message}" raw=${details.rawPreview ?? '<empty>'}`
       );
       throw new Error(details.message || statusError);
@@ -326,7 +327,7 @@ export async function openCodeZenGenerateJson(
         .filter(Boolean)
         .join(' ');
 
-      console.error(`[ingestion][opencode] empty_completion ${detail}`);
+      logger.error(`[ingestion][opencode] empty_completion ${detail}`);
       throw new Error(`OpenCode Zen completion response was empty (${detail})`);
     }
 

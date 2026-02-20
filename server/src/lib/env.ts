@@ -4,6 +4,7 @@
  */
 
 type EnvLike = Record<string, string | undefined>;
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 let contextEnv: EnvLike | null = null;
 
@@ -26,6 +27,11 @@ function getEnvSource(): EnvLike {
 export function getEnv(key: string, defaultValue?: string): string | undefined {
   const value = getEnvSource()[key];
   return value !== undefined ? value : defaultValue;
+}
+
+function parsePositiveInteger(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 /**
@@ -77,6 +83,18 @@ export function getFirebaseProjectId(): string {
  */
 export function getAllowAnonymousUsers(): boolean {
   return getEnv('ALLOW_ANONYMOUS_USERS') !== 'false';
+}
+
+export function getLogLevel(): LogLevel {
+  const normalized = getEnv('LOG_LEVEL', 'info')?.trim().toLowerCase();
+  if (normalized === 'debug' || normalized === 'info' || normalized === 'warn' || normalized === 'error') {
+    return normalized;
+  }
+  return 'info';
+}
+
+export function getLogPollingSummaryIntervalMs(): number {
+  return parsePositiveInteger(getEnv('LOG_POLLING_SUMMARY_INTERVAL_MS', '10000'), 10000);
 }
 
 export function getDocumentStructurerProvider(): string {

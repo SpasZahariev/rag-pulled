@@ -11,6 +11,7 @@ import { createDocumentStructurer } from './adapters/document-structurer';
 import { createEmbeddingGenerator } from './adapters/embedding-generator';
 import { getDocumentStructurerProvider, getEmbeddingProvider, validateIngestionProviderEnv } from '../env';
 import type { StructuredDocumentResult } from './types';
+import { logger } from '../logger';
 
 function asIsoTimestamp(value: number): string {
   return new Date(value).toISOString();
@@ -20,12 +21,13 @@ function asIsoTimestamp(value: number): string {
  * Runs the full structuring + embedding pipeline for one claimed ingestion job.
  */
 export async function processIngestionJob(jobId: string): Promise<void> {
+  const jobStartedMs = Date.now();
   try {
     validateIngestionProviderEnv();
     const documents = await getDocumentsForJob(jobId);
     const structurer = createDocumentStructurer(getDocumentStructurerProvider());
     const embeddingGenerator = createEmbeddingGenerator(getEmbeddingProvider());
-    console.log(
+    logger.info(
       `[worker] Processing job ${jobId} with structurer=${structurer.id} embedding=${embeddingGenerator.id}`
     );
 
@@ -38,14 +40,14 @@ export async function processIngestionJob(jobId: string): Promise<void> {
         structured = await structurer.structure(absolutePath, document.mime_type);
         const structuringEndedMs = Date.now();
         const durationMs = structuringEndedMs - structuringStartedMs;
-        console.log(
+        logger.debug(
           `[worker][timing] phase=structuring jobId=${jobId} documentId=${document.id} originalName="${document.original_name}" provider=${structurer.id} status=${structured.status} startedAt=${asIsoTimestamp(structuringStartedMs)} endedAt=${asIsoTimestamp(structuringEndedMs)} durationMs=${durationMs} durationSec=${(durationMs / 1000).toFixed(3)}`
         );
       } catch (error) {
         const structuringEndedMs = Date.now();
         const durationMs = structuringEndedMs - structuringStartedMs;
         const message = error instanceof Error ? error.message : 'Unknown structure failure';
-        console.error(
+        logger.error(
           `[worker][timing] phase=structuring jobId=${jobId} documentId=${document.id} originalName="${document.original_name}" provider=${structurer.id} status=threw startedAt=${asIsoTimestamp(structuringStartedMs)} endedAt=${asIsoTimestamp(structuringEndedMs)} durationMs=${durationMs} durationSec=${(durationMs / 1000).toFixed(3)} error="${message}"`
         );
         throw error;
@@ -73,14 +75,14 @@ export async function processIngestionJob(jobId: string): Promise<void> {
         }
         const embeddingEndedMs = Date.now();
         const durationMs = embeddingEndedMs - embeddingStartedMs;
-        console.log(
+        logger.debug(
           `[worker][timing] phase=embeddings jobId=${jobId} documentId=${document.id} originalName="${document.original_name}" provider=${embeddingGenerator.id} chunks=${insertedChunks.length} startedAt=${asIsoTimestamp(embeddingStartedMs)} endedAt=${asIsoTimestamp(embeddingEndedMs)} durationMs=${durationMs} durationSec=${(durationMs / 1000).toFixed(3)}`
         );
       } catch (error) {
         const embeddingEndedMs = Date.now();
         const durationMs = embeddingEndedMs - embeddingStartedMs;
         const message = error instanceof Error ? error.message : 'Unknown embedding failure';
-        console.error(
+        logger.error(
           `[worker][timing] phase=embeddings jobId=${jobId} documentId=${document.id} originalName="${document.original_name}" provider=${embeddingGenerator.id} chunks=${insertedChunks.length} status=threw startedAt=${asIsoTimestamp(embeddingStartedMs)} endedAt=${asIsoTimestamp(embeddingEndedMs)} durationMs=${durationMs} durationSec=${(durationMs / 1000).toFixed(3)} error="${message}"`
         );
         throw error;
@@ -90,8 +92,18 @@ export async function processIngestionJob(jobId: string): Promise<void> {
     }
 
     await setJobStatus(jobId, 'completed', null);
+    const jobEndedMs = Date.now();
+    const durationMs = jobEndedMs - jobStartedMs;
+    logger.info(
+      `[worker][timing] phase=job jobId=${jobId} status=completed startedAt=${asIsoTimestamp(jobStartedMs)} endedAt=${asIsoTimestamp(jobEndedMs)} durationMs=${durationMs} durationSec=${(durationMs / 1000).toFixed(3)}`
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown ingestion worker failure';
+    const jobEndedMs = Date.now();
+    const durationMs = jobEndedMs - jobStartedMs;
+    logger.error(
+      `[worker][timing] phase=job jobId=${jobId} status=failed startedAt=${asIsoTimestamp(jobStartedMs)} endedAt=${asIsoTimestamp(jobEndedMs)} durationMs=${durationMs} durationSec=${(durationMs / 1000).toFixed(3)} error="${message}"`
+    );
     await setJobFailedWithRetry(jobId, message);
   }
 }

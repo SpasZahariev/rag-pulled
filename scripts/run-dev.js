@@ -2,7 +2,7 @@
 import { spawn, execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, mkdirSync, createWriteStream } from 'fs';
 import {
   getAvailablePorts,
   createFirebaseConfig,
@@ -20,9 +20,125 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 const normalizedProjectRoot = projectRoot.replace(/\\/g, '/');
+const logsDir = path.join(projectRoot, 'logs');
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function stripAnsi(input) {
+  return input.replace(/\u001b\[[0-9;]*m/g, '');
+}
+
+function createServiceLogWriters(serviceNames) {
+  if (!existsSync(logsDir)) {
+    mkdirSync(logsDir, { recursive: true });
+  }
+
+  const writers = new Map();
+  const startedAt = new Date().toISOString();
+  for (const serviceName of serviceNames) {
+    const filePath = path.join(logsDir, `${serviceName}.log`);
+    const writer = createWriteStream(filePath, { flags: 'a' });
+    writer.write(`\n--- dev session started ${startedAt} ---\n`);
+    writers.set(serviceName, writer);
+  }
+  return writers;
+}
+
+function writePrefixedLinesToServiceLogs(chunk, streamType, lineBuffers, serviceLogWriters) {
+  const bufferKey = streamType === 'stderr' ? 'stderr' : 'stdout';
+  lineBuffers[bufferKey] += chunk;
+  const segments = lineBuffers[bufferKey].split(/\r?\n/);
+  lineBuffers[bufferKey] = segments.pop() ?? '';
+
+  for (const segment of segments) {
+    const line = stripAnsi(segment).replace(/\r/g, '');
+    if (!line.trim()) {
+      continue;
+    }
+
+    const match = line.match(/^\[([^\]]+)\]\s?(.*)$/);
+    if (!match) {
+      continue;
+    }
+
+    const [, serviceName, message] = match;
+    const writer = serviceLogWriters.get(serviceName);
+    if (!writer) {
+      continue;
+    }
+
+    writer.write(`${new Date().toISOString()} ${message}\n`);
+  }
+}
+
+function createNoisyLogAggregator() {
+  return {
+    firebaseExportLines: 0,
+    backupSnapshotLines: 0,
+  };
+}
+
+function shouldSuppressNoisyServiceLine(serviceName, message, noisyLogAggregator) {
+  if (serviceName === 'firebase') {
+    const isExportLine =
+      message.includes('Received export request') || message.includes('Export complete.');
+    if (isExportLine) {
+      noisyLogAggregator.firebaseExportLines += 1;
+      return true;
+    }
+  }
+
+  if (serviceName === 'backup') {
+    const isBackupLine = message.includes('Emulator data backed up');
+    if (isBackupLine) {
+      noisyLogAggregator.backupSnapshotLines += 1;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function flushNoisyLogSummary(noisyLogAggregator) {
+  const firebaseExportLines = noisyLogAggregator.firebaseExportLines;
+  const backupSnapshotLines = noisyLogAggregator.backupSnapshotLines;
+  if (firebaseExportLines === 0 && backupSnapshotLines === 0) {
+    return;
+  }
+
+  process.stdout.write(
+    `[logs] Aggregated noisy logs in last minute: firebaseExportLines=${firebaseExportLines} backupSnapshots=${backupSnapshotLines} (full details in logs/firebase.log and logs/backup.log)\n`
+  );
+  noisyLogAggregator.firebaseExportLines = 0;
+  noisyLogAggregator.backupSnapshotLines = 0;
+}
+
+function writeFilteredConsoleOutput(chunk, streamType, outputBuffers, noisyLogAggregator) {
+  const bufferKey = streamType === 'stderr' ? 'stderr' : 'stdout';
+  outputBuffers[bufferKey] += chunk;
+  const segments = outputBuffers[bufferKey].split(/\r?\n/);
+  outputBuffers[bufferKey] = segments.pop() ?? '';
+
+  for (const segment of segments) {
+    const normalizedLine = stripAnsi(segment).replace(/\r/g, '');
+    if (!normalizedLine.trim()) {
+      process.stdout.write('\n');
+      continue;
+    }
+
+    const prefixedMatch = normalizedLine.match(/^\[([^\]]+)\]\s?(.*)$/);
+    if (prefixedMatch) {
+      const [, serviceName, message] = prefixedMatch;
+      if (shouldSuppressNoisyServiceLine(serviceName, message, noisyLogAggregator)) {
+        continue;
+      }
+    }
+
+    const target = streamType === 'stderr' ? process.stderr : process.stdout;
+    target.write(`${segment}\n`);
+  }
 }
 
 function listProjectServicePids() {
@@ -401,6 +517,9 @@ async function startServices() {
     serviceNames.push('frontend');
     serviceColors.push('green');
 
+    const serviceLogWriters = createServiceLogWriters(serviceNames);
+    const lineBuffers = { stdout: '', stderr: '' };
+
 
 
     // Start services with clean output monitoring
@@ -423,7 +542,11 @@ async function startServices() {
     let startupTimeout;
     let servicesStarted = new Set();
     let capturedOutput = '';
-    let outputPipesCreated = false;
+    const noisyLogAggregator = createNoisyLogAggregator();
+    const outputBuffers = { stdout: '', stderr: '' };
+    const noisySummaryInterval = setInterval(() => {
+      flushNoisyLogSummary(noisyLogAggregator);
+    }, 60_000);
 
     // Set a timeout for startup detection
     const timeoutDuration = config.useLocalFirebase ? 15000 : 10000; // Shorter timeout if no Firebase emulator
@@ -439,18 +562,13 @@ async function startServices() {
         console.log('✅ All services are starting up...\n');
         showServiceInfo(availablePorts, cliArgs.useWrangler, config);
         startupComplete = true;
-        // Switch to live output (only once)
-        if (!outputPipesCreated) {
-          child.stdout.pipe(process.stdout);
-          child.stderr.pipe(process.stderr);
-          outputPipesCreated = true;
-        }
       }
     }, timeoutDuration);
 
     // Monitor output for service startup indicators
     child.stdout.on('data', (data) => {
       const output = data.toString();
+      writePrefixedLinesToServiceLogs(output, 'stdout', lineBuffers, serviceLogWriters);
       
       if (!startupComplete) {
         const hasDatabaseStartFailure =
@@ -506,19 +624,15 @@ async function startServices() {
           
           console.log('✅ All services started successfully!\n');
           showServiceInfo(availablePorts, cliArgs.useWrangler, config);
-          
-          // Switch to live output for ongoing logs (only once)
-          if (!outputPipesCreated) {
-            child.stdout.pipe(process.stdout);
-            child.stderr.pipe(process.stderr);
-            outputPipesCreated = true;
-          }
         }
+      } else {
+        writeFilteredConsoleOutput(output, 'stdout', outputBuffers, noisyLogAggregator);
       }
     });
 
     child.stderr.on('data', (data) => {
       const output = data.toString();
+      writePrefixedLinesToServiceLogs(output, 'stderr', lineBuffers, serviceLogWriters);
       
       if (!startupComplete) {
         // Check for startup errors
@@ -528,11 +642,20 @@ async function startServices() {
           console.error(output);
           process.exit(1);
         }
+      } else {
+        writeFilteredConsoleOutput(output, 'stderr', outputBuffers, noisyLogAggregator);
       }
     });
 
     // Cleanup function
     const cleanup = () => {
+      for (const writer of serviceLogWriters.values()) {
+        if (!writer.writableEnded) {
+          writer.end();
+        }
+      }
+      clearInterval(noisySummaryInterval);
+      flushNoisyLogSummary(noisyLogAggregator);
       if (envState) {
         restoreEnvFile(envState);
       }

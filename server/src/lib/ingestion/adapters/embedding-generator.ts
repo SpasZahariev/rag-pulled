@@ -1,5 +1,6 @@
 import type { EmbeddingResult } from '../types';
 import { getOllamaEmbeddingModel } from '../../env';
+import { logger } from '../../logger';
 import { ollamaEmbed } from '../ollama-client';
 
 export interface EmbeddingGenerator {
@@ -49,7 +50,7 @@ class OllamaEmbeddingGenerator implements EmbeddingGenerator {
       };
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown embedding failure';
-      console.error(
+      logger.error(
         `[ingestion][embedding] provider=${this.id} model=${this.model} failed: ${reason}`
       );
       throw new Error(

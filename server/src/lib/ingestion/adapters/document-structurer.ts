@@ -1,6 +1,7 @@
 import { extname } from 'node:path';
 import { readFile } from 'fs-extra';
 import { getOllamaStructurerModel, getOpenCodeZenStructurerModel } from '../../env';
+import { logger } from '../../logger';
 import { ollamaGenerateJson } from '../ollama-client';
 import { openCodeZenGenerateJson } from '../opencode-zen-client';
 import { extractTextFromFile, isSupportedExtractionExtension } from '../text-extraction';
@@ -199,7 +200,7 @@ class OllamaDocumentStructurer implements DocumentStructurer {
       };
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown structuring failure';
-      console.error(
+      logger.error(
         `[ingestion][structurer] provider=${this.id} model=${this.model} extension=${extension || 'unknown'} failed: ${reason}`
       );
       return {
@@ -271,7 +272,7 @@ class OpenCodeZenDocumentStructurer implements DocumentStructurer {
       };
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown structuring failure';
-      console.error(
+      logger.error(
         `[ingestion][structurer] provider=${this.id} model=${this.model} extension=${extension || 'unknown'} failed: ${reason}`
       );
       return {

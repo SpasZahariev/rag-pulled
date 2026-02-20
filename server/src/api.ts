@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
 import { authMiddleware } from './middleware/auth';
 import { getDatabase, testDatabaseConnection } from './lib/db';
-import { setEnvContext, clearEnvContext, getDatabaseUrl } from './lib/env';
+import { setEnvContext, clearEnvContext, getDatabaseUrl, getLogPollingSummaryIntervalMs } from './lib/env';
+import { logger, isLogLevelEnabled } from './lib/logger';
 import * as schema from './schema/users';
 import { getAllowedUploadExtensions, saveFilesToTempStorage } from './lib/upload-storage';
 import { enqueueIngestionJob, getIngestionJobWithDocuments } from './lib/ingestion/queue';
@@ -15,6 +15,38 @@ type Env = {
 };
 
 const app = new Hono<{ Bindings: Env }>();
+const pollingStatusPathPattern = /^\/api\/v1\/protected\/uploads\/[^/]+\/status$/;
+const pollingSummaryIntervalMs = getLogPollingSummaryIntervalMs();
+const pollingSummary = {
+  windowStartedAtMs: Date.now(),
+  requestCount: 0,
+  successCount: 0,
+  errorCount: 0,
+  totalDurationMs: 0,
+  maxDurationMs: 0,
+};
+
+function resetPollingSummary(nowMs: number): void {
+  pollingSummary.windowStartedAtMs = nowMs;
+  pollingSummary.requestCount = 0;
+  pollingSummary.successCount = 0;
+  pollingSummary.errorCount = 0;
+  pollingSummary.totalDurationMs = 0;
+  pollingSummary.maxDurationMs = 0;
+}
+
+function flushPollingSummaryIfNeeded(nowMs: number): void {
+  const windowMs = nowMs - pollingSummary.windowStartedAtMs;
+  if (windowMs < pollingSummaryIntervalMs || pollingSummary.requestCount === 0) {
+    return;
+  }
+
+  const averageDurationMs = pollingSummary.totalDurationMs / pollingSummary.requestCount;
+  logger.info(
+    `[server][polling] route=/api/v1/protected/uploads/:jobId/status requests=${pollingSummary.requestCount} ok=${pollingSummary.successCount} error=${pollingSummary.errorCount} avgMs=${averageDurationMs.toFixed(1)} maxMs=${pollingSummary.maxDurationMs} windowMs=${windowMs}`
+  );
+  resetPollingSummary(nowMs);
+}
 
 // In Node.js environment, set environment context from process.env
 if (typeof process !== 'undefined' && process.env) {
@@ -33,7 +65,51 @@ app.use('*', async (c, next) => {
 });
 
 // Middleware
-app.use('*', logger());
+app.use('*', async (c, next) => {
+  const startedAt = Date.now();
+  const method = c.req.method;
+  const path = c.req.path;
+  const isOptionsRequest = method === 'OPTIONS';
+  const isHealthCheck = method === 'GET' && path === '/';
+  const isPollingStatusRequest = method === 'GET' && pollingStatusPathPattern.test(path);
+
+  if (isLogLevelEnabled('debug')) {
+    logger.debug(`[server] <-- ${method} ${path}`);
+  }
+
+  await next();
+
+  const durationMs = Date.now() - startedAt;
+  const status = c.res.status;
+  const nowMs = Date.now();
+
+  if (isPollingStatusRequest) {
+    pollingSummary.requestCount += 1;
+    pollingSummary.totalDurationMs += durationMs;
+    pollingSummary.maxDurationMs = Math.max(pollingSummary.maxDurationMs, durationMs);
+    if (status >= 200 && status < 400) {
+      pollingSummary.successCount += 1;
+    } else {
+      pollingSummary.errorCount += 1;
+    }
+
+    if (isLogLevelEnabled('debug')) {
+      logger.debug(`[server] --> ${method} ${path} ${status} ${durationMs}ms`);
+    }
+    flushPollingSummaryIfNeeded(nowMs);
+    return;
+  }
+
+  if (isOptionsRequest) {
+    return;
+  }
+
+  if (isHealthCheck && !isLogLevelEnabled('debug')) {
+    return;
+  }
+
+  logger.info(`[server] --> ${method} ${path} ${status} ${durationMs}ms`);
+});
 app.use('*', cors());
 
 // Health check route - public
@@ -77,7 +153,7 @@ api.get('/db-test', async (c) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Database test error:', error);
+    logger.error('Database test error:', error);
     return c.json({
       error: 'Database connection failed',
       details: error instanceof Error ? error.message : 'Unknown error',
@@ -154,7 +230,7 @@ protectedRoutes.post('/uploads', async (c) => {
       ...uploadResult,
     }, 201);
   } catch (error) {
-    console.error('Upload route error:', error);
+    logger.error('Upload route error:', error);
     return c.json({
       error: 'Failed to process uploaded files',
       details: error instanceof Error ? error.message : 'Unknown error',
@@ -196,7 +272,7 @@ protectedRoutes.get('/uploads/:jobId/status', async (c) => {
       createdAt: result.job.created_at,
     });
   } catch (error) {
-    console.error('Upload status route error:', error);
+    logger.error('Upload status route error:', error);
     return c.json(
       {
         error: 'Failed to fetch upload job status',

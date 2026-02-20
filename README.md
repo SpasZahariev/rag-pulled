@@ -51,6 +51,13 @@ This automatically assigns available ports and displays them on startup:
 - **Backend API**: Usually `http://localhost:8787` (or next available)
 - **PostgreSQL**: Embedded database on dynamic port (starts from 5433)
 
+### Logging Controls
+
+- Backend + worker logs use level-based output controlled by `LOG_LEVEL` in `server/.env` (`debug`, `info`, `warn`, `error`; default `info`).
+- Upload status polling logs are sampled into periodic summaries instead of logging every request.
+- Tune polling summary cadence with `LOG_POLLING_SUMMARY_INTERVAL_MS` (default `10000`).
+- `pnpm run dev` also mirrors each service stream to separate files under `logs/` (`database.log`, `firebase.log`, `backup.log`, `server.log`, `worker.log`, `frontend.log`).
+
 The system handles port conflicts automatically. For multiple projects, use separate folders.
 
 > **📋 Port Management**: See [`docs/PORT_HANDLING.md`](docs/PORT_HANDLING.md) for details on running multiple instances and port conflict resolution.

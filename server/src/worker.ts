@@ -11,6 +11,7 @@ import {
   getOpenCodeZenStructurerModel,
   validateIngestionProviderEnv,
 } from './lib/env';
+import { logger } from './lib/logger';
 
 const pollIntervalMs = Number(getEnv('INGESTION_WORKER_POLL_MS', '2000'));
 const startupDbWaitTimeoutMs = Number(getEnv('INGESTION_WORKER_DB_WAIT_TIMEOUT_MS', '30000'));
@@ -31,7 +32,7 @@ function logProviderConfiguration(): void {
   const embeddingModel = getOllamaEmbeddingModel();
   const timestamp = new Date().toISOString();
 
-  console.log(
+  logger.info(
     `[worker][startup] timestamp=${timestamp} structurerProvider=${structurerProvider} structurerModel="${structurerModel}" embeddingProvider=${embeddingProvider} embeddingModel="${embeddingModel}"`
   );
 }
@@ -49,18 +50,18 @@ async function runTick(): Promise<void> {
       return;
     }
 
-    console.log(`[worker] Claimed ingestion job ${claimedJob.id}`);
+    logger.info(`[worker] Claimed ingestion job ${claimedJob.id}`);
     await processIngestionJob(claimedJob.id);
     didLogDbNotReady = false;
   } catch (error) {
     if (isTransientDatabaseNotReadyError(error)) {
       if (!didLogDbNotReady) {
-        console.warn('[worker] Database is not fully ready yet; retrying on next tick.');
+        logger.warn('[worker] Database is not fully ready yet; retrying on next tick.');
         didLogDbNotReady = true;
       }
       return;
     }
-    console.error('[worker] Tick failed:', error);
+    logger.error('[worker] Tick failed:', error);
   } finally {
     isTickRunning = false;
   }
@@ -105,7 +106,7 @@ async function waitForDatabasePort(): Promise<boolean> {
     if (connected) {
       const elapsedMs = Date.now() - startedAtMs;
       if (elapsedMs > 0) {
-        console.log(`[worker] Database reachable at ${host}:${port} after ${elapsedMs}ms.`);
+        logger.debug(`[worker] Database reachable at ${host}:${port} after ${elapsedMs}ms.`);
       }
       return true;
     }
@@ -148,12 +149,12 @@ function isTransientDatabaseNotReadyError(error: unknown): boolean {
 }
 
 async function startWorker(): Promise<void> {
-  console.log(`[worker] Starting ingestion worker (poll every ${pollIntervalMs}ms)`);
+  logger.info(`[worker] Starting ingestion worker (poll every ${pollIntervalMs}ms)`);
   try {
     logProviderConfiguration();
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown startup error';
-    console.error(`[worker] Startup configuration failed: ${message}`);
+    logger.error(`[worker] Startup configuration failed: ${message}`);
     process.exitCode = 1;
     return;
   }
@@ -161,7 +162,7 @@ async function startWorker(): Promise<void> {
   const dbReady = await waitForDatabasePort();
   if (!dbReady) {
     const { host, port } = getDatabaseHostAndPort();
-    console.warn(
+    logger.warn(
       `[worker] Timed out waiting ${startupDbWaitTimeoutMs}ms for database at ${host}:${port}. Continuing with retries.`
     );
   }
@@ -174,7 +175,7 @@ async function startWorker(): Promise<void> {
 }
 
 function shutdown(signal: string): void {
-  console.log(`[worker] Received ${signal}. Shutting down...`);
+  logger.info(`[worker] Received ${signal}. Shutting down...`);
   isShuttingDown = true;
 }
 
@@ -183,6 +184,6 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 void startWorker().catch((error) => {
   const message = error instanceof Error ? error.message : 'Unknown startup error';
-  console.error(`[worker] Startup failed: ${message}`);
+  logger.error(`[worker] Startup failed: ${message}`);
   process.exitCode = 1;
 });
