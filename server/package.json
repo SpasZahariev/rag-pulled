@@ -13,6 +13,7 @@
   "dependencies": {
     "@hono/node-server": "^1.12.0",
     "@neondatabase/serverless": "^0.9.0",
+    "@opencode-ai/sdk": "^1.2.10",
     "dotenv": "^16.0.0",
     "drizzle-orm": "^0.30.1",
     "firebase-admin": "^12.0.0",

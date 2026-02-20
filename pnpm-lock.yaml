@@ -45,6 +45,9 @@ importers:
       '@neondatabase/serverless':
         specifier: ^0.9.0
         version: 0.9.5
+      '@opencode-ai/sdk':
+        specifier: ^1.2.10
+        version: 1.2.10
       dotenv:
         specifier: ^16.0.0
         version: 16.5.0
@@ -1594,6 +1597,9 @@ packages:
   '@npmcli/fs@4.0.0':
     resolution: {integrity: sha512-/xGlezI6xfGO9NwuJlnwz/K14qD1kCSAGtacBHnGzeAIuJGazcp45KP5NuyARXoKb7cwulAGWVsbeSxdG/cb0Q==}
     engines: {node: ^18.17.0 || >=20.5.0}
+
+  '@opencode-ai/sdk@1.2.10':
+    resolution: {integrity: sha512-SyXcVqry2hitPVvQtvXOhqsWyFhSycG/+LTLYXrcq8AFmd9FR7dyBSDB3f5Ol6IPkYOegk8P2Eg2kKPNSNiKGw==}
 
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
@@ -7101,6 +7107,8 @@ snapshots:
     dependencies:
       semver: 7.7.2
     optional: true
+
+  '@opencode-ai/sdk@1.2.10': {}
 
   '@opentelemetry/api@1.9.0': {}
 
