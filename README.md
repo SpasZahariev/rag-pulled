@@ -57,7 +57,7 @@ The system handles port conflicts automatically. For multiple projects, use sepa
 >
 > **📄 Upload Ingestion**: See [`docs/UPLOAD_INGESTION_PIPELINE.md`](docs/UPLOAD_INGESTION_PIPELINE.md) for the async upload to structure to embedding flow.
 >
-> **🧠 Local AI Ingestion**: Upload processing uses local Ollama models for structuring and embeddings by default (`qwen2.5:14b-instruct` + `mxbai-embed-large`).
+> **🧠 Local AI Ingestion**: Upload processing uses local Ollama models for structuring and embeddings by default (`qwen2.5:14b-instruct` + `mxbai-embed-large`). You can switch only the structurer to OpenCode Zen by setting `DOCUMENT_STRUCTURER_PROVIDER=opencode-zen-structurer-v1` plus `OPENCODE_ZEN_API_KEY`.
 
 ### Individual Commands
 

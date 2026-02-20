@@ -87,6 +87,45 @@ export function getEmbeddingProvider(): string {
   return getEnv('EMBEDDING_PROVIDER', 'ollama-emb-v1')!;
 }
 
+export function getOpenCodeZenBaseUrl(): string {
+  return getEnv('OPENCODE_ZEN_BASE_URL', 'https://api.opencode.ai')!;
+}
+
+export function getOpenCodeZenApiKey(): string {
+  return getRequiredEnv('OPENCODE_ZEN_API_KEY');
+}
+
+export function getOpenCodeZenStructurerModel(): string {
+  return getEnv('OPENCODE_ZEN_STRUCTURER_MODEL', 'MiniMax M2.5 Free')!;
+}
+
+export function getOpenCodeZenTemperature(): number {
+  const raw = getEnv('OPENCODE_ZEN_TEMPERATURE', '0');
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function getOpenCodeZenMaxTokens(): number | undefined {
+  const raw = getEnv('OPENCODE_ZEN_MAX_TOKENS');
+  if (!raw) {
+    return undefined;
+  }
+
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+export function validateIngestionProviderEnv(): void {
+  const structurerProvider = getDocumentStructurerProvider();
+  const embeddingProvider = getEmbeddingProvider();
+  const usesOpenCodeZen =
+    structurerProvider.startsWith('opencode-zen-') || embeddingProvider.startsWith('opencode-zen-');
+
+  if (usesOpenCodeZen) {
+    getOpenCodeZenApiKey();
+  }
+}
+
 export function getOllamaBaseUrl(): string {
   return getEnv('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')!;
 }

@@ -95,6 +95,11 @@ Add these to your server environment file:
 - `OLLAMA_EMBEDDING_MODEL` (default: `mxbai-embed-large`)
 - `OLLAMA_TEMPERATURE` (default: `0`)
 - `OLLAMA_NUM_CTX` (optional context window override)
+- `OPENCODE_ZEN_API_KEY` (required only when `DOCUMENT_STRUCTURER_PROVIDER=opencode-zen-structurer-v1`)
+- `OPENCODE_ZEN_BASE_URL` (default: `https://api.opencode.ai`)
+- `OPENCODE_ZEN_STRUCTURER_MODEL` (default: `MiniMax M2.5 Free`)
+- `OPENCODE_ZEN_TEMPERATURE` (default: `0`)
+- `OPENCODE_ZEN_MAX_TOKENS` (optional chat completion cap)
 - `INGESTION_WORKER_POLL_MS` (default: `2000`)
 
 Model setup:
@@ -104,4 +109,22 @@ ollama pull qwen2.5:14b-instruct
 ollama pull mxbai-embed-large
 ```
 
+OpenCode Zen structurer example (embeddings stay on Ollama):
+
+```bash
+DOCUMENT_STRUCTURER_PROVIDER=opencode-zen-structurer-v1
+EMBEDDING_PROVIDER=ollama-emb-v1
+OPENCODE_ZEN_API_KEY=your_api_key_here
+OPENCODE_ZEN_STRUCTURER_MODEL="MiniMax M2.5 Free"
+```
+
 If either configured model cannot execute, ingestion logs a provider/model-specific error and marks the job for retry/failure according to queue policy.
+
+## Timing logs
+
+Worker logs include timestamped duration entries for both ingestion phases per document:
+
+- `phase=structuring` with `startedAt`, `endedAt`, `durationMs`, `durationSec`, provider, and status.
+- `phase=embeddings` with the same timing fields plus chunk count.
+
+These timing logs are emitted for both successful runs and thrown failures to make phase-level latency and failure points easier to debug.
