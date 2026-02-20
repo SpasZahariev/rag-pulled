@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, readFileSync } from 'fs';
@@ -18,6 +18,99 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.join(__dirname, '..');
+const normalizedProjectRoot = projectRoot.replace(/\\/g, '/');
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function listProjectServicePids() {
+  if (process.platform === 'win32') {
+    return [];
+  }
+
+  let output = '';
+  try {
+    output = execSync('ps -eo pid=,args=', { encoding: 'utf8' });
+  } catch {
+    return [];
+  }
+
+  const lines = output.split('\n').map(line => line.trim()).filter(Boolean);
+  const pids = [];
+
+  for (const line of lines) {
+    const firstSpace = line.indexOf(' ');
+    if (firstSpace === -1) {
+      continue;
+    }
+
+    const pid = Number(line.slice(0, firstSpace).trim());
+    const cmd = line.slice(firstSpace + 1);
+
+    if (!Number.isInteger(pid) || pid <= 0 || pid === process.pid || pid === process.ppid) {
+      continue;
+    }
+
+    const inWorkspace = cmd.includes(normalizedProjectRoot);
+    const isManagedServiceProcess =
+      cmd.includes(`${normalizedProjectRoot}/scripts/run-dev.js`) ||
+      cmd.includes(`${normalizedProjectRoot}/scripts/periodic-emulator-backup.js`) ||
+      cmd.includes(`${normalizedProjectRoot}/server/node_modules/.bin/../tsx/dist/cli.mjs watch src/server.ts`) ||
+      cmd.includes(`${normalizedProjectRoot}/server/node_modules/.bin/../tsx/dist/cli.mjs watch src/worker.ts`) ||
+      cmd.includes(`${normalizedProjectRoot}/database-server/node_modules/.bin/../tsx/dist/cli.mjs watch src/index.ts`) ||
+      cmd.includes(`${normalizedProjectRoot}/ui/node_modules/.bin/../vite/bin/vite.js`) ||
+      cmd.includes(`${normalizedProjectRoot}/node_modules/.bin/../firebase-tools/lib/bin/firebase.js emulators:start`) ||
+      (cmd.includes(`${normalizedProjectRoot}/data/postgres`) && cmd.includes('embedded-postgres')) ||
+      cmd.includes(`${normalizedProjectRoot}/node_modules/.bin/../concurrently/dist/bin/concurrently.js`);
+
+    if (inWorkspace && isManagedServiceProcess) {
+      pids.push(pid);
+    }
+  }
+
+  return [...new Set(pids)];
+}
+
+function sendSignalToPids(pids, signal) {
+  for (const pid of pids) {
+    try {
+      process.kill(pid, signal);
+    } catch {
+      // Ignore dead or inaccessible processes.
+    }
+  }
+}
+
+function filterAlivePids(pids) {
+  return pids.filter(pid => {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
+async function cleanupPreviousServiceInstances() {
+  const stalePids = listProjectServicePids();
+  if (stalePids.length === 0) {
+    return;
+  }
+
+  console.log(`🧹 Found ${stalePids.length} existing service process(es). Stopping...`);
+  sendSignalToPids(stalePids, 'SIGTERM');
+  await sleep(2000);
+
+  const remaining = filterAlivePids(stalePids);
+  if (remaining.length > 0) {
+    console.log(`⚠️ ${remaining.length} process(es) still running. Forcing stop...`);
+    sendSignalToPids(remaining, 'SIGKILL');
+    await sleep(500);
+  }
+}
 
 /**
  * Auto-detects if wrangler is being used by checking server's package.json
@@ -182,6 +275,7 @@ async function startServices() {
   }
 
   console.log('🚀 Starting volo-app development server...\n');
+  await cleanupPreviousServiceInstances();
 
   // Store cleanup state
   let envState = null;
@@ -359,6 +453,22 @@ async function startServices() {
       const output = data.toString();
       
       if (!startupComplete) {
+        const hasDatabaseStartFailure =
+          output.includes('Failed to start database server') ||
+          output.includes('Failed to start embedded PostgreSQL') ||
+          output.includes('lock file "postmaster.pid" already exists');
+        if (hasDatabaseStartFailure) {
+          clearTimeout(startupTimeout);
+          clearInterval(spinnerInterval);
+          process.stdout.write('\r' + ' '.repeat(50) + '\r');
+          if (capturedOutput) {
+            process.stdout.write(capturedOutput);
+          }
+          process.stdout.write(output);
+          console.error('❌ Database startup failed. Resolve the database lock/process and retry.');
+          process.exit(1);
+        }
+
         // Capture output during startup
         capturedOutput += output;
         

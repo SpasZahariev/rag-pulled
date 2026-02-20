@@ -88,7 +88,7 @@ export function getEmbeddingProvider(): string {
 }
 
 export function getOpenCodeZenBaseUrl(): string {
-  return getEnv('OPENCODE_ZEN_BASE_URL', 'https://api.opencode.ai')!;
+  return getEnv('OPENCODE_ZEN_BASE_URL', 'https://opencode.ai/zen/v1/chat/completions')!;
 }
 
 export function getOpenCodeZenApiKey(): string {
@@ -96,7 +96,7 @@ export function getOpenCodeZenApiKey(): string {
 }
 
 export function getOpenCodeZenStructurerModel(): string {
-  return getEnv('OPENCODE_ZEN_STRUCTURER_MODEL', 'MiniMax M2.5 Free')!;
+  return getEnv('OPENCODE_ZEN_STRUCTURER_MODEL', 'minimax-m2.5-free')!;
 }
 
 export function getOpenCodeZenTemperature(): number {
