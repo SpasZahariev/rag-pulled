@@ -8,6 +8,7 @@ import { logger, isLogLevelEnabled } from './lib/logger';
 import * as schema from './schema/users';
 import { getAllowedUploadExtensions, saveFilesToTempStorage } from './lib/upload-storage';
 import { enqueueIngestionJob, getIngestionJobWithDocuments } from './lib/ingestion/queue';
+import { ragChat } from './lib/rag/chat';
 
 type Env = {
   RUNTIME?: string;
@@ -276,6 +277,47 @@ protectedRoutes.get('/uploads/:jobId/status', async (c) => {
     return c.json(
       {
         error: 'Failed to fetch upload job status',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    );
+  }
+});
+
+protectedRoutes.post('/chat', async (c) => {
+  try {
+    const user = c.get('user');
+    const body = await c.req.json();
+
+    const message = body?.message;
+    if (typeof message !== 'string' || message.trim().length === 0) {
+      return c.json({ error: '"message" is required and must be a non-empty string.' }, 400);
+    }
+
+    const history: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    if (Array.isArray(body.history)) {
+      for (const entry of body.history) {
+        if (
+          entry &&
+          typeof entry.content === 'string' &&
+          (entry.role === 'user' || entry.role === 'assistant')
+        ) {
+          history.push({ role: entry.role, content: entry.content });
+        }
+      }
+    }
+
+    const result = await ragChat(user.id, message.trim(), history);
+
+    return c.json({
+      reply: result.reply,
+      sources: result.sources,
+    });
+  } catch (error) {
+    logger.error('Chat route error:', error);
+    return c.json(
+      {
+        error: 'Failed to process chat message',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       500

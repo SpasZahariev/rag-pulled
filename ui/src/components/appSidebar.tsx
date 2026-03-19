@@ -4,6 +4,7 @@ import {
   FileText,
   Layers,
   Upload,
+  MessageSquare,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -59,6 +60,14 @@ export function AppSidebar() {
                   <Link to="/upload">
                     <Upload className="w-4 h-4" />
                     <span>Upload Data</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="RAG Chat" isActive={isActive('/rag-chat')} asChild>
+                  <Link to="/rag-chat">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>RAG Chat</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

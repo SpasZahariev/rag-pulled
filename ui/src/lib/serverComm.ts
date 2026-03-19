@@ -133,21 +133,37 @@ export async function getUploadJobStatus(jobId: string): Promise<UploadJobStatus
   return response.json();
 }
 
-// Example of how to add more API endpoints:
-// export async function createChat(data: CreateChatData) {
-//   const response = await fetchWithAuth('/api/v1/protected/chats', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify(data),
-//   });
-//   return response.json();
-// }
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface ChatSource {
+  documentName: string;
+  chunkText: string;
+  similarity: number;
+}
+
+export interface ChatResponse {
+  reply: string;
+  sources: ChatSource[];
+}
+
+export async function sendChatMessage(
+  message: string,
+  history: ChatMessage[]
+): Promise<ChatResponse> {
+  const response = await fetchWithAuth('/api/v1/protected/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history }),
+  });
+  return response.json();
+}
 
 export const api = {
   getCurrentUser,
   uploadFiles,
   getUploadJobStatus,
-  // Add other API endpoints here
+  sendChatMessage,
 }; 

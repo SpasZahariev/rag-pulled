@@ -145,6 +145,10 @@ export function getGeminiStructurerModel(): string {
   return getEnv('GEMINI_STRUCTURER_MODEL', 'gemini-2.5-flash')!;
 }
 
+export function getGeminiChatModel(): string {
+  return getEnv('GEMINI_CHAT_MODEL', 'gemini-2.5-flash')!;
+}
+
 export function getGeminiTemperature(): number {
   const raw = getEnv('GEMINI_TEMPERATURE', '0');
   const parsed = Number(raw);
