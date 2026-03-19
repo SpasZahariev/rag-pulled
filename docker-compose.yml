@@ -1,0 +1,86 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  firebase-emulator:
+    build:
+      context: .
+      dockerfile: docker/firebase-emulator/Dockerfile
+    ports:
+      - "5503:5503"
+      - "5504:5504"
+    volumes:
+      - firebase_data:/app/data/firebase-emulator
+
+  server:
+    build:
+      context: .
+      target: server
+    ports:
+      - "8787:8787"
+    environment:
+      PORT: 8787
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      FIREBASE_PROJECT_ID: demo-project
+      FIREBASE_AUTH_EMULATOR_HOST: firebase-emulator:5503
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+      firebase-emulator:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      target: worker
+    environment:
+      PORT: 8787
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      FIREBASE_PROJECT_ID: demo-project
+      FIREBASE_AUTH_EMULATOR_HOST: firebase-emulator:5503
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ui:
+    build:
+      context: .
+      target: ui
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./ui/src:/app/ui/src
+      - ./ui/index.html:/app/ui/index.html
+    command:
+      [
+        "pnpm", "run", "dev", "--",
+        "--host",
+        "--port", "5173",
+        "--api-url", "http://localhost:8787",
+        "--use-firebase-emulator", "true",
+        "--firebase-auth-port", "5503"
+      ]
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+  firebase_data:

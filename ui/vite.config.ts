@@ -13,19 +13,21 @@ const parseCliArgs = () => {
   
   return {
     port: portIndex !== -1 ? parseInt(args[portIndex + 1]) : 5173,
+    host: args.includes('--host'),
     apiUrl: apiUrlIndex !== -1 ? args[apiUrlIndex + 1] : 'http://localhost:5500',
     firebaseAuthPort: firebaseAuthPortIndex !== -1 ? args[firebaseAuthPortIndex + 1] : '5503',
     useFirebaseEmulator: useFirebaseEmulatorIndex !== -1 ? args[useFirebaseEmulatorIndex + 1] : 'false'
   };
 };
 
-const { port, apiUrl, firebaseAuthPort, useFirebaseEmulator } = parseCliArgs();
+const { port, host, apiUrl, firebaseAuthPort, useFirebaseEmulator } = parseCliArgs();
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: port
+    port,
+    ...(host && { host: true }),
   },
   define: {
     'import.meta.env.VITE_API_URL': `"${apiUrl}"`,

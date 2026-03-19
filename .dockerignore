@@ -1,0 +1,26 @@
+node_modules
+data
+logs
+dist
+dist-ssr
+build
+.git
+.gitignore
+.vscode
+.idea
+.wrangler
+.cloudflare
+.mf
+.dev.vars
+*.log
+*.tsbuildinfo
+coverage
+.vite
+
+# Environment files (compose sets its own env vars)
+server/.env
+server/.dev.vars
+
+# Docker files themselves
+docker-compose.yml
+Dockerfile
