@@ -133,6 +133,24 @@ export function getOpenCodeZenMaxTokens(): number | undefined {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+export function getGeminiApiKey(): string {
+  return getRequiredEnv('GEMINI_API_KEY');
+}
+
+export function getGeminiBaseUrl(): string {
+  return getEnv('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com')!;
+}
+
+export function getGeminiStructurerModel(): string {
+  return getEnv('GEMINI_STRUCTURER_MODEL', 'gemini-2.5-flash')!;
+}
+
+export function getGeminiTemperature(): number {
+  const raw = getEnv('GEMINI_TEMPERATURE', '0');
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export function validateIngestionProviderEnv(): void {
   const structurerProvider = getDocumentStructurerProvider();
   const embeddingProvider = getEmbeddingProvider();
@@ -141,6 +159,10 @@ export function validateIngestionProviderEnv(): void {
 
   if (usesOpenCodeZen) {
     getOpenCodeZenApiKey();
+  }
+
+  if (structurerProvider.startsWith('gemini-')) {
+    getGeminiApiKey();
   }
 }
 

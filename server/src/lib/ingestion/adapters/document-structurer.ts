@@ -1,7 +1,8 @@
 import { extname } from 'node:path';
 import { readFile } from 'fs-extra';
-import { getOllamaStructurerModel, getOpenCodeZenStructurerModel } from '../../env';
+import { getGeminiStructurerModel, getOllamaStructurerModel, getOpenCodeZenStructurerModel } from '../../env';
 import { logger } from '../../logger';
+import { geminiGenerateJson } from '../gemini-client';
 import { ollamaGenerateJson } from '../ollama-client';
 import { openCodeZenGenerateJson } from '../opencode-zen-client';
 import { extractTextFromFile, isSupportedExtractionExtension } from '../text-extraction';
@@ -284,6 +285,78 @@ class OpenCodeZenDocumentStructurer implements DocumentStructurer {
   }
 }
 
+class GeminiDocumentStructurer implements DocumentStructurer {
+  id = 'gemini-structurer-v1';
+  private readonly model = getGeminiStructurerModel();
+
+  async structure(filePath: string, mimeType: string): Promise<StructuredDocumentResult> {
+    const extension = extname(filePath).toLowerCase();
+    if (!isSupportedExtractionExtension(filePath)) {
+      return {
+        status: 'unsupported',
+        chunks: [],
+        error: `Unsupported file extension: ${extension || 'unknown'}`,
+      };
+    }
+
+    try {
+      const extractedText = await extractTextFromFile(filePath);
+      const trimmedText = extractedText.trim();
+      if (!trimmedText) {
+        return {
+          status: 'failed',
+          chunks: [],
+          error: `No extractable text found for ${extension || mimeType}`,
+        };
+      }
+
+      const segments = splitForStructuring(trimmedText);
+      const chunks: StructuredChunk[] = [];
+
+      for (const [segmentIndex, segmentText] of segments.entries()) {
+        const prompt = [
+          `File extension: ${extension || 'unknown'}`,
+          `Mime type: ${mimeType || 'unknown'}`,
+          `Segment index: ${segmentIndex + 1} of ${segments.length}`,
+          'Input text:',
+          segmentText,
+        ].join('\n');
+
+        const raw = await geminiGenerateJson(this.model, STRUCTURER_SYSTEM_PROMPT, prompt);
+        const parsed = JSON.parse(extractJsonObject(raw));
+        const normalized = normalizeChunks((parsed as any).chunks);
+
+        for (const chunk of normalized) {
+          chunks.push({
+            chunkIndex: chunks.length,
+            text: chunk.text,
+            metadata: {
+              ...(chunk.metadata ?? {}),
+              sourceExtension: extension || 'unknown',
+              segmentIndex,
+            },
+          });
+        }
+      }
+
+      return {
+        status: 'structured',
+        chunks,
+      };
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown structuring failure';
+      logger.error(
+        `[ingestion][structurer] provider=${this.id} model=${this.model} extension=${extension || 'unknown'} failed: ${reason}`
+      );
+      return {
+        status: 'failed',
+        chunks: [],
+        error: `Structured extraction failed for provider "${this.id}" and model "${this.model}": ${reason}`,
+      };
+    }
+  }
+}
+
 export function createDocumentStructurer(providerId: string): DocumentStructurer {
   if (providerId === 'ollama-structurer-v1') {
     return new OllamaDocumentStructurer();
@@ -291,6 +364,10 @@ export function createDocumentStructurer(providerId: string): DocumentStructurer
 
   if (providerId === 'opencode-zen-structurer-v1') {
     return new OpenCodeZenDocumentStructurer();
+  }
+
+  if (providerId === 'gemini-structurer-v1') {
+    return new GeminiDocumentStructurer();
   }
 
   if (providerId === 'deterministic-v1') {

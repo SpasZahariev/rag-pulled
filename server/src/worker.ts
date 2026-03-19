@@ -6,6 +6,7 @@ import {
   getDocumentStructurerProvider,
   getEmbeddingProvider,
   getEnv,
+  getGeminiStructurerModel,
   getOllamaEmbeddingModel,
   getOllamaStructurerModel,
   getOpenCodeZenStructurerModel,
@@ -28,7 +29,9 @@ function logProviderConfiguration(): void {
   const structurerModel =
     structurerProvider === 'opencode-zen-structurer-v1'
       ? getOpenCodeZenStructurerModel()
-      : getOllamaStructurerModel();
+      : structurerProvider === 'gemini-structurer-v1'
+        ? getGeminiStructurerModel()
+        : getOllamaStructurerModel();
   const embeddingModel = getOllamaEmbeddingModel();
   const timestamp = new Date().toISOString();
 

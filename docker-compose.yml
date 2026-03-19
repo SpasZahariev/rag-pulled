@@ -32,6 +32,10 @@ services:
       target: server
     ports:
       - "8787:8787"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - upload_data:/app/server/tmp/uploads
     environment:
       PORT: 8787
       NODE_ENV: development
@@ -39,6 +43,11 @@ services:
       FIREBASE_PROJECT_ID: demo-project
       FIREBASE_AUTH_EMULATOR_HOST: firebase-emulator:5503
       OLLAMA_BASE_URL: http://host.docker.internal:11434
+      DOCUMENT_STRUCTURER_PROVIDER: gemini-structurer-v1
+      EMBEDDING_PROVIDER: ollama-emb-v1
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_STRUCTURER_MODEL: gemini-2.5-flash
+      GEMINI_TEMPERATURE: "0"
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,6 +58,10 @@ services:
     build:
       context: .
       target: worker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - upload_data:/app/server/tmp/uploads
     environment:
       PORT: 8787
       NODE_ENV: development
@@ -56,6 +69,11 @@ services:
       FIREBASE_PROJECT_ID: demo-project
       FIREBASE_AUTH_EMULATOR_HOST: firebase-emulator:5503
       OLLAMA_BASE_URL: http://host.docker.internal:11434
+      DOCUMENT_STRUCTURER_PROVIDER: gemini-structurer-v1
+      EMBEDDING_PROVIDER: ollama-emb-v1
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_STRUCTURER_MODEL: gemini-2.5-flash
+      GEMINI_TEMPERATURE: "0"
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,3 +102,4 @@ services:
 volumes:
   postgres_data:
   firebase_data:
+  upload_data:
