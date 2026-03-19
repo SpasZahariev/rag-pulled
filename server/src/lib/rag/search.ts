@@ -10,30 +10,13 @@ export type SearchResult = {
   similarity: number;
 };
 
-const COSINE_SIMILARITY_QUERY = sql`
-  SELECT
-    dc.id AS chunk_id,
-    dc.text,
-    dc.metadata,
-    ud.original_name AS document_name,
-    (
-      SELECT SUM(q.val * (e.val)::float8)
-      FROM unnest(${sql.placeholder('queryVector')}::float8[]) WITH ORDINALITY AS q(val, idx),
-           jsonb_array_elements_text(ce.embedding) WITH ORDINALITY AS e(val, idx)
-      WHERE q.idx = e.idx
-    ) / NULLIF(
-      sqrt((SELECT SUM(q.val * q.val) FROM unnest(${sql.placeholder('queryVector')}::float8[]) AS q(val)))
-      *
-      sqrt((SELECT SUM((e.val)::float8 * (e.val)::float8) FROM jsonb_array_elements_text(ce.embedding) AS e(val))),
-      0
-    ) AS similarity
-  FROM app.chunk_embeddings ce
-  JOIN app.document_chunks dc ON dc.id = ce.chunk_id
-  JOIN app.uploaded_documents ud ON ud.id = dc.document_id
-  WHERE ud.user_id = ${sql.placeholder('userId')}
-  ORDER BY similarity DESC
-  LIMIT ${sql.placeholder('topK')}
-`;
+// Drizzle + postgres.js can double-serialize JSONB: the number[] ends up stored
+// as a JSON string scalar ("[ ... ]") instead of a JSON array ([ ... ]).
+// This expression unwraps the string case so jsonb_array_elements_text always
+// receives an actual JSON array.
+const EMBEDDING_ARRAY = sql.raw(
+  `CASE WHEN jsonb_typeof(ce.embedding) = 'array' THEN ce.embedding ELSE (ce.embedding #>> '{}')::jsonb END`
+);
 
 export async function searchSimilarChunks(
   queryVector: number[],
@@ -56,12 +39,12 @@ export async function searchSimilarChunks(
         (
           SELECT SUM(q.val * (e.val)::float8)
           FROM unnest(${vectorLiteral}::float8[]) WITH ORDINALITY AS q(val, idx),
-               jsonb_array_elements_text(ce.embedding) WITH ORDINALITY AS e(val, idx)
+               jsonb_array_elements_text(${EMBEDDING_ARRAY}) WITH ORDINALITY AS e(val, idx)
           WHERE q.idx = e.idx
         ) / NULLIF(
           sqrt((SELECT SUM(q.val * q.val) FROM unnest(${vectorLiteral}::float8[]) AS q(val)))
           *
-          sqrt((SELECT SUM((e.val)::float8 * (e.val)::float8) FROM jsonb_array_elements_text(ce.embedding) AS e(val))),
+          sqrt((SELECT SUM((e.val)::float8 * (e.val)::float8) FROM jsonb_array_elements_text(${EMBEDDING_ARRAY}) AS e(val))),
           0
         ) AS similarity
       FROM app.chunk_embeddings ce
