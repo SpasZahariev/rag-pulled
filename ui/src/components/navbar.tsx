@@ -21,12 +21,12 @@ export function Navbar({ onSignInClick }: NavbarProps = {}) {
   const isAnonymous = user?.isAnonymous ?? false;
 
   return (
-    <header className="sticky top-0 z-50 flex items-center h-12 px-2 border-b shrink-0 bg-background">
+    <header className="sticky top-0 z-50 flex items-center h-12 px-4 border-b-3 border-foreground shrink-0 bg-background">
       <div className="flex items-center">
         <SidebarTrigger className="size-8">
           <Menu className="w-5 h-5" />
         </SidebarTrigger>
-        <span className="font-semibold ml-3">My App</span>
+        <span className="font-black text-lg uppercase tracking-wide ml-3">RagPull</span>
       </div>
       <div className="flex items-center gap-3 ml-auto">
         {user && !isAnonymous && (
@@ -40,6 +40,7 @@ export function Navbar({ onSignInClick }: NavbarProps = {}) {
             <Button
               variant="outline"
               size="sm"
+              className="mb-[4px]"
               onClick={onSignInClick}
             >
               Sign In
@@ -48,6 +49,7 @@ export function Navbar({ onSignInClick }: NavbarProps = {}) {
             <Button
               variant="outline"
               size="sm"
+              className="mb-[4px]"
               onClick={handleLogout}
             >
               Sign Out
