@@ -1,370 +1,124 @@
-# Your Volo App
+# RagPull: Full-Stack RAG Application
 
-Welcome to your new full-stack application! This project was created with `create-volo-app` and comes pre-configured with a modern tech stack and production-ready architecture.
+An end-to-end Retrieval-Augmented Generation (RAG) platform built to demonstrate a production-ready, local-first architecture for document ingestion, semantic search, and AI-driven chat. 
 
-## 🎯 **Philosophy**
+This project was built to showcase a robust technical foundation integrating modern frontend frameworks with a scalable, async backend processing pipeline.
 
-This application provides a highly opinionated, production-ready foundation for building full-stack applications with a decoupled frontend and backend. It's designed to maximize development velocity while adhering to best practices, including clear separation of concerns and secure handling of sensitive credentials.
+## 🚀 Key Features
 
-Many boilerplates offer a rapid 'hello world' experience for local development but often defer critical decisions about authentication, database integration, and production deployment. This template takes a different approach. We believe that the complexities of a true full-stack application - setting up auth, a database, and distinct hosting for UI and API - are largely unavoidable for production use. By addressing these components comprehensively from the start, this template aims to provide a clearer, more predictable path to a robust, deployable application, minimizing 'surprise' hurdles down the line and fostering a deeper understanding of the full stack architecture.
+*   **Asynchronous Document Ingestion:** A robust backend worker queue built on PostgreSQL orchestrates the extraction, chunking, and embedding of various document types (PDF, CSV, TXT, etc.).
+*   **Local AI Integration:** Leverages local LLMs via Ollama (`qwen2.5:14b-instruct` for document structuring, `mxbai-embed-large` for embeddings) for entirely private, offline processing.
+*   **RAG Chat Interface:** An intuitive chat UI where users can query their uploaded knowledge base. The AI responses include precise citations, revealing exactly which document chunks and vector match percentages informed the answer.
+*   **Production-Ready Architecture:** Designed with a decoupled frontend (React/Vite) and backend (Hono API), complete with authentication (Firebase) and a relational database (PostgreSQL/Drizzle), ensuring a smooth path from local development to cloud deployment.
 
-Start with everything running locally on your machine, then progressively connect to production services when you're ready or dive in and connect them all at app creation.
+## 🛠️ Tech Stack
 
-## 🚀 **What You Have**
+*   **Frontend:** React, TypeScript, Vite, Tailwind CSS, ShadCN UI
+*   **Backend:** Node.js, Hono API, background worker processes
+*   **Database & ORM:** PostgreSQL, Drizzle ORM (handling both application data and vector storage/queues)
+*   **AI & Embeddings:** Ollama (Local LLMs), pluggable provider architecture
+*   **Authentication:** Firebase Auth (with local emulator support)
+*   **Deployment:** Cloudflare Pages & Workers ready
 
+## ⚡ Architecture & Processing Flow
 
-**Frontend:**
-- ⚛️ React + TypeScript + Vite
-- 🎨 Tailwind CSS + ShadCN components
-- 🔐 Firebase Authentication (Google Sign-In)
+The core of RagPull is its asynchronous ingestion pipeline and subsequent semantic search capabilities. Here is how data flows through the system:
 
-**Backend:**
-- 🔥 Hono API backend (NodeJS)
-- 🗄️ PostgreSQL with Drizzle ORM
-- 🔑 Firebase Admin SDK
+```mermaid
+flowchart TD
+    %% Styling
+    classDef user fill:#e2e8f0,stroke:#64748b,color:#0f172a
+    classDef frontend fill:#bae6fd,stroke:#3b82f6,color:#0f172a
+    classDef api fill:#fef08a,stroke:#0ea5e9,color:#0f172a
+    classDef worker fill:#fed7aa,stroke:#eab308,color:#0f172a
+    classDef db fill:#bbf7d0,stroke:#22c55e,color:#0f172a
+    classDef ai fill:#fbcfe8,stroke:#ec4899,color:#0f172a
 
-**Local Development (Default):**
-- ⚡ Runs UI + Server + DB + Auth on your computer
-- 🏠 Embedded PostgreSQL database
-- 🔧 Firebase Auth emulator
-- ✅ Zero sign-ins or accounts needed
+    %% Nodes
+    User(("User")):::user
+    
+    subgraph Frontend [React UI]
+        UploadUI["Upload Interface"]:::frontend
+        ChatUI["RAG Chat Interface"]:::frontend
+    end
 
-**Production (when connected):**
-- 🌐 Cloudflare Pages + Workers deployment ready
-- 🗄️ Neon, Supabase, or custom PostgreSQL
-- 🔐 Production Firebase Auth
+    subgraph Backend [Hono API]
+        UploadRoute["POST /uploads"]:::api
+        ChatRoute["POST /chat"]:::api
+    end
 
-## 🛠️ **Development**
+    subgraph QueueWorker [Async Processing]
+        Worker["Background Worker"]:::worker
+        Structurer["Document Structurer<br/>(Qwen2.5)"]:::ai
+        Embedder["Embedding Model<br/>(mxbai-embed)"]:::ai
+    end
 
-Start both frontend and backend (with embedded PostgreSQL database and Firebase emulator):
+    subgraph Database [PostgreSQL]
+        AppDB[("App Data<br/>(Users, Jobs)")]:::db
+        VectorDB[("Vector Store<br/>(pgvector)")]:::db
+    end
 
-```bash
-pnpm run dev
+    %% Upload Flow
+    User -->|Uploads Document| UploadUI
+    UploadUI -->|Multipart File| UploadRoute
+    UploadRoute -->|Enqueues Job| AppDB
+    
+    %% Ingestion Flow
+    AppDB -->|Claims Job| Worker
+    Worker -->|Extracts Text| Structurer
+    Structurer -->|Structured Chunks| Worker
+    Worker -->|Generates Vectors| Embedder
+    Embedder -->|Embeddings| Worker
+    Worker -->|Persists Chunks & Vectors| VectorDB
+
+    %% Chat Flow
+    User -->|Asks Question| ChatUI
+    ChatUI -->|Query| ChatRoute
+    ChatRoute -->|Embeds Query| Embedder
+    Embedder -->|Query Vector| ChatRoute
+    ChatRoute -->|Semantic Search| VectorDB
+    VectorDB -->|Top K Chunks| ChatRoute
+    ChatRoute -->|Generates Answer| AIModel["LLM Generator"]:::ai
+    AIModel -->|Response + Citations| ChatUI
 ```
 
-For all startup flows in one place (single command, split logs, manual per-terminal), use:
+## 📸 Application Showcase
 
-- [`docs/START_SERVICES.md`](docs/START_SERVICES.md)
+*(Please take the screenshots as discussed and place them in the `docs/images/` folder. They will automatically render here once added).*
 
-This automatically assigns available ports and displays them on startup:
-- **Frontend**: Usually `http://localhost:5173` (or next available)
-- **Backend API**: Usually `http://localhost:8787` (or next available)
-- **PostgreSQL**: Embedded database on dynamic port (starts from 5433)
+### The Dashboard
+The central hub for navigating the application.
 
-### Logging Controls
+![Home Page](docs/images/home.png)
 
-- Backend + worker logs use level-based output controlled by `LOG_LEVEL` in `server/.env` (`debug`, `info`, `warn`, `error`; default `info`).
-- Upload status polling logs are sampled into periodic summaries instead of logging every request.
-- Tune polling summary cadence with `LOG_POLLING_SUMMARY_INTERVAL_MS` (default `10000`).
-- `pnpm run dev` also mirrors each service stream to separate files under `logs/` (`database.log`, `firebase.log`, `backup.log`, `server.log`, `worker.log`, `frontend.log`).
+### Data Ingestion
+The interface for uploading documents, complete with real-time, granular progress tracking as the background worker processes the queue.
 
-The system handles port conflicts automatically. For multiple projects, use separate folders.
+![Upload Processing](docs/images/upload.png)
 
-> **📋 Port Management**: See [`docs/PORT_HANDLING.md`](docs/PORT_HANDLING.md) for details on running multiple instances and port conflict resolution.
->
-> **📄 Upload Ingestion**: See [`docs/UPLOAD_INGESTION_PIPELINE.md`](docs/UPLOAD_INGESTION_PIPELINE.md) for the async upload to structure to embedding flow.
->
-> **🧠 Local AI Ingestion**: Upload processing uses local Ollama models for structuring and embeddings by default (`qwen2.5:14b-instruct` + `mxbai-embed-large`). You can switch only the structurer to OpenCode Zen by setting `DOCUMENT_STRUCTURER_PROVIDER=opencode-zen-structurer-v1` plus `OPENCODE_ZEN_API_KEY`.
+### Semantic Search & Chat
+The conversational interface for querying the knowledge base. Notice the "Sources" expansion, which provides transparency into the RAG process by showing the exact matched chunks.
 
-### Individual Commands
+![RAG Chat Interface](docs/images/chat.png)
 
-```bash
-# Frontend only
-cd ui && pnpm run dev
+## 💻 Local Development
 
-# Backend only  
-cd server && pnpm run dev
+Everything needed to run RagPull is containerized or embedded for a seamless local developer experience.
 
-# Ingestion worker only
-cd server && pnpm run worker:dev
+1.  **Install dependencies:**
+    ```bash
+    pnpm install
+    ```
+2.  **Start all services:**
+    This single command spins up the frontend, backend API, async worker, embedded PostgreSQL database, and local Firebase Auth emulator.
+    ```bash
+    pnpm run dev
+    ```
+3.  **Local AI Setup:**
+    Ensure Ollama is installed and the required models are pulled:
+    ```bash
+    ollama pull qwen2.5:14b-instruct
+    ollama pull mxbai-embed-large
+    ```
 
-# Build frontend
-cd ui && pnpm run build
-
-# Deploy backend (requires production setup)
-cd server && pnpm run deploy
-```
-
-### Connect with psql
-
-Use `psql` to inspect the embedded local PostgreSQL database:
-
-```bash
-# Fixed manual port
-psql "postgresql://postgres:password@localhost:5502/postgres"
-
-# Dynamic port from current server/.env
-psql "$(rg '^DATABASE_URL=' /home/spas/dev/js-projects/rag-pulled/server/.env | sed 's/^DATABASE_URL=//')"
-```
-
-## 🔗 **Connecting Production Services**
-
-Your app defaults to everything running locally. Connect to production services when you're ready:
-
-### Connect Production Database
-```bash
-# Choose from available providers
-pnpm connect:database
-
-# Or connect to specific provider
-pnpm connect:database:neon      # Neon PostgreSQL
-pnpm connect:database:supabase  # Supabase PostgreSQL
-pnpm connect:database:custom    # Custom PostgreSQL
-```
-
-### Connect Production Authentication
-```bash
-# Set up production Firebase Auth
-pnpm connect:auth
-```
-
-### Connect Production Deployment
-```bash
-# Set up Cloudflare Workers + Pages deployment
-pnpm connect:deploy
-```
-
-### Check Connection Status
-```bash
-# See what's connected to production vs local
-pnpm connection:status
-```
-
-**What happens when you connect services:**
-- Your `.env` files are automatically updated
-- A backup of your current config is created
-- You can always revert to local development by restoring the backup
-
-## 📁 **Project Structure**
-
-```
-├── ui/                    # React frontend
-│   ├── src/
-│   │   ├── components/    # UI components (ShadCN)
-│   │   ├── lib/          # Utilities & Firebase config
-│   │   └── App.tsx       # Main app component
-│   └── package.json
-├── server/               # Hono API backend
-│   ├── src/
-│   │   ├── middleware/   # Auth & other middleware
-│   │   ├── schema/       # Database schema (Drizzle)
-│   │   ├── lib/ingestion/ # Upload queue, worker processing, and adapters
-│   │   └── index.ts      # API routes
-│   ├── wrangler.toml     # Cloudflare Worker config (when connected)
-│   ├── .env              # Your environmental variables
-│   └── package.json
-├── data/                 # Local development data
-│   ├── postgres/         # Embedded PostgreSQL data
-│   └── firebase-emulator/ # Firebase emulator data (auto-backed up)
-└── scripts/
-    ├── post-setup.js     # Setup automation
-    ├── run-dev.js        # Development server runner
-    └── periodic-emulator-backup.js # Firebase data backup (runs automatically)
-```
-
-## 🔧 **Customization**
-
-### Adding API Routes
-
-Edit `server/src/index.ts`:
-
-```typescript
-// Add to the existing api router
-api.get('/your-route', (c) => {
-  return c.json({ message: 'Hello!' });
-});
-
-// For protected routes, add to protectedRoutes:
-protectedRoutes.get('/private-route', (c) => {
-  const user = c.get('user'); // Get authenticated user
-  return c.json({ user });
-});
-```
-
-### Database Changes
-
-1. Edit schema in `server/src/schema/`
-2. Push changes: `cd server && pnpm db:push`
-
-### UI Components
-
-- Add components in `ui/src/components/`
-- Use ShadCN/UI: Browse components at [ui.shadcn.com](https://ui.shadcn.com)
-- Install new components: `cd ui && npx shadcn-ui@latest add [component]`
-
-### Styling
-
-- Modify `ui/tailwind.config.js` for custom themes
-- Global styles in `ui/src/index.css`
-- Use Tailwind utility classes throughout
-
-## 🚀 **Deployment**
-
-> **Note**: Embedded PostgreSQL is for local development only. Production deployments require an external database (configured during setup).
-
-### Backend (Cloudflare Workers)
-
-```bash
-cd server
-pnpm run deploy
-```
-
-Your API will be available at: `https://your-worker-name.your-subdomain.workers.dev`
-
-### Frontend (Cloudflare Pages)
-
-1. **Connect to Git**: Link your repository to [Cloudflare Pages](https://dash.cloudflare.com/pages)
-2. **Build Settings**:
-   - Build command: `pnpm run build`
-   - Build output: `ui/dist`
-3. **Deploy**: Automatic on every git push
-
-### Environment Variables (Production)
-
-Set these in Cloudflare dashboards:
-
-**Worker Environment Variables:**
-- `DATABASE_URL` - Your database connection string
-- `FIREBASE_PROJECT_ID` - Firebase project ID
-
-**Pages Environment Variables (if needed):**
-- `VITE_API_URL` - Your deployed worker URL (optional, defaults work)
-
-### Post-Deployment Setup
-
-1. **Update Firebase authorized domains**:
-   - Go to [Firebase Console](https://console.firebase.google.com) > Authentication > Settings
-   - Add your Pages domain (e.g., `your-app.pages.dev`)
-
-2. **Test your deployment**:
-   ```bash
-   curl https://your-worker-name.your-subdomain.workers.dev/api/v1/hello
-   ```
-
-## 🔐 **Authentication Flow**
-
-Your app includes a complete authentication system that works in both local and production modes:
-
-### Local Mode (Default)
-1. **Sign in**: Use any email/password combination in the UI
-2. **Storage**: User data stored in local Firebase emulator
-3. **API calls**: Authenticated requests work normally
-4. **Development**: No external accounts needed
-
-### Production Mode (After `pnpm connect:auth`)
-1. **Login**: Users sign in with Google (or other configured providers)
-2. **Token**: Frontend gets Firebase ID token
-3. **API calls**: Token sent in `Authorization: Bearer <token>` header
-4. **Verification**: Backend verifies token and creates/finds user in database
-5. **Protection**: Protected routes automatically have user context
-
-### Example API Call
-
-```typescript
-// Frontend (already implemented in lib/serverComm.ts)
-const response = await api.getCurrentUser();
-console.log(response.user);
-```
-
-## 🗄️ **Database**
-
-Your database is set up with Drizzle ORM and works the same whether local or production:
-
-### User Schema (included)
-
-```typescript
-// server/src/schema/users.ts
-export const users = pgTable('users', {
-  id: text('id').primaryKey(),
-  email: text('email').unique().notNull(),
-  display_name: text('display_name'),
-  photo_url: text('photo_url'),
-  created_at: timestamp('created_at').defaultNow(),
-  updated_at: timestamp('updated_at').defaultNow(),
-});
-```
-
-### Adding New Tables
-
-1. Create schema file in `server/src/schema/`
-2. Export from main schema file
-3. Push to database: `cd server && pnpm db:push`
-
-### Upload Ingestion Tables
-
-The async upload ingestion pipeline persists processing state in:
-
-- `app.ingestion_jobs`
-- `app.uploaded_documents`
-- `app.document_chunks`
-- `app.chunk_embeddings`
-
-## 📚 **Learning Resources**
-
-- **React**: [react.dev](https://react.dev)
-- **Hono**: [hono.dev](https://hono.dev)
-- **Drizzle ORM**: [orm.drizzle.team](https://orm.drizzle.team)
-- **Tailwind CSS**: [tailwindcss.com](https://tailwindcss.com)
-- **ShadCN/UI**: [ui.shadcn.com](https://ui.shadcn.com)
-- **Cloudflare Workers**: [developers.cloudflare.com/workers](https://developers.cloudflare.com/workers)
-- **Firebase Auth**: [firebase.google.com/docs/auth](https://firebase.google.com/docs/auth)
-
-## 🆘 **Troubleshooting**
-
-### Development Issues
-
-**Backend won't start:**
-```bash
-cd server
-# Check environment variables
-cat .env
-# Reinstall dependencies
-pnpm install
-```
-
-**Database connection errors:**
-```bash
-cd server
-# Test database connection
-pnpm db:push
-```
-
-**Frontend build errors:**
-```bash
-cd ui
-# Clear cache and reinstall
-rm -rf node_modules .vite dist
-pnpm install
-```
-
-### Authentication Issues
-
-**Local Development:**
-- Firebase emulator should start automatically with `pnpm dev`
-- Try signing in with any email/password combination
-- Check `data/firebase-emulator/` for persisted data
-- **Data Protection**: Emulator data is automatically backed up every 60 seconds and on clean shutdown to prevent data loss during crashes
-
-**Production Mode:**
-1. **Check Firebase config**: `ui/src/lib/firebase-config.json`
-2. **Verify environment variables**: `server/.env`
-3. **Check authorized domains** in Firebase Console
-
-### Deployment Issues
-
-1. **Verify build succeeds locally**
-2. **Check environment variables** in Cloudflare dashboards
-3. **Review logs** in Cloudflare Workers/Pages dashboards
-
-## 🎯 **Next Steps**
-
-1. **Explore the code**: Start with `ui/src/App.tsx` and `server/src/index.ts`
-2. **Customize the UI**: Modify components and styling
-3. **Add features**: Build your app logic in both frontend and backend
-4. **Deploy**: Push to git for automatic deployment
-
----
-
-**Happy coding!** 🚀
-
-Need help? Check the detailed documentation in each workspace (`server/README.md`, `ui/README.md`) or visit the [community discussions](https://github.com/VoloBuilds/create-volo-app/discussions). 
+For detailed setup, port management, and production deployment guides, refer to the `docs/` directory.

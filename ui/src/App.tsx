@@ -6,8 +6,6 @@ import { Navbar } from '@/components/navbar';
 import { AppSidebar } from '@/components/appSidebar';
 import { Home } from '@/pages/Home';
 import { Settings } from '@/pages/Settings';
-import { Page1 } from '@/pages/Page1';
-import { Page2 } from '@/pages/Page2';
 import { UploadData } from '@/pages/UploadData';
 import { RagChat } from '@/pages/RagChat';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -30,7 +28,7 @@ function AppContent() {
   // Show loading while authentication or profile is loading
   if (loading || profileLoading) {
     return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="animate-spin h-8 w-8 border-3 border-foreground border-t-primary"></div>
     </div>;
   }
 
@@ -53,7 +51,7 @@ function AppContent() {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="flex flex-col w-full min-h-screen bg-background">
         <Navbar onSignInClick={handleSignInClick} />
         {shouldShowLogin ? (
@@ -67,8 +65,6 @@ function AppContent() {
               <main className="flex-1">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/page1" element={<Page1 />} />
-                  <Route path="/page2" element={<Page2 />} />
                   <Route path="/upload" element={<UploadData />} />
                   <Route path="/rag-chat" element={<RagChat />} />
                   <Route path="/settings" element={<Settings />} />
@@ -87,10 +83,10 @@ function App() {
     <AuthProvider>
       <ThemeProvider 
         attribute="class" 
-        defaultTheme="system" 
+        defaultTheme="light" 
         enableSystem
         disableTransitionOnChange
-        storageKey="volo-app-theme"
+        storageKey="ragpull-theme"
       >
         <Router>
           <AppContent />

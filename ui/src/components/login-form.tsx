@@ -172,7 +172,7 @@ export function LoginForm() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="w-full bg-white hover:bg-gray-50 text-gray-900 hover:text-gray-900 dark:bg-white dark:hover:bg-gray-50 dark:text-gray-900 dark:hover:text-gray-900 flex gap-2 items-center justify-center"
+                className="w-full bg-white text-gray-900 dark:bg-white dark:text-gray-900 flex gap-2 items-center justify-center"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
               >
@@ -191,10 +191,10 @@ export function LoginForm() {
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t-3 border-foreground" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or with email</span>
+                <div className="relative flex justify-center text-xs uppercase font-bold">
+                  <span className="bg-card px-2 text-muted-foreground">Or with email</span>
                 </div>
               </div>
               
@@ -241,7 +241,7 @@ export function LoginForm() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="w-full bg-white hover:bg-gray-50 text-gray-900 hover:text-gray-900 dark:bg-white dark:hover:bg-gray-50 dark:text-gray-900 dark:hover:text-gray-900 flex gap-2 items-center justify-center"
+                className="w-full bg-white text-gray-900 dark:bg-white dark:text-gray-900 flex gap-2 items-center justify-center"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
               >
@@ -260,10 +260,10 @@ export function LoginForm() {
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t-3 border-foreground" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or with email</span>
+                <div className="relative flex justify-center text-xs uppercase font-bold">
+                  <span className="bg-card px-2 text-muted-foreground">Or with email</span>
                 </div>
               </div>
               
@@ -304,16 +304,16 @@ export function LoginForm() {
         
         {/* Error Display */}
         {error && (
-          <div className="p-3 border rounded-lg bg-red-50 border-red-200">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="p-3 border-3 border-foreground bg-destructive/10">
+            <p className="text-sm text-destructive font-bold">{error}</p>
           </div>
         )}
         
         {/* Existing Account Prompt */}
         {showExistingAccountPrompt && (
-          <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
-            <h4 className="font-medium text-blue-900 mb-2">Existing Google Account Detected</h4>
-            <p className="text-sm text-blue-800 mb-3">
+          <div className="p-4 border-3 border-foreground bg-primary/10">
+            <h4 className="font-bold mb-2">Existing Google Account Detected</h4>
+            <p className="text-sm mb-3">
               This Google account already exists. Signing in will switch to your existing account 
               (your current session will be lost).
             </p>
