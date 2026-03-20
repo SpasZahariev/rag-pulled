@@ -43,11 +43,17 @@ services:
       FIREBASE_PROJECT_ID: demo-project
       FIREBASE_AUTH_EMULATOR_HOST: firebase-emulator:5503
       OLLAMA_BASE_URL: http://host.docker.internal:11434
+      # impornat for changing model around rate limits!!!
       DOCUMENT_STRUCTURER_PROVIDER: gemini-structurer-v1
+      # DOCUMENT_STRUCTURER_PROVIDER: opencode-zen-structurer-v1
       EMBEDDING_PROVIDER: ollama-emb-v1
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_STRUCTURER_MODEL: gemini-2.5-flash
       GEMINI_TEMPERATURE: "0"
+      OPENCODE_ZEN_API_KEY: ${OPENCODE_ZEN_API_KEY}
+      OPENCODE_ZEN_BASE_URL: https://opencode.ai/zen/v1/chat/completions
+      OPENCODE_ZEN_STRUCTURER_MODEL: minimax-m2.5-free
+      OPENCODE_ZEN_TEMPERATURE: "0"
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,11 +75,17 @@ services:
       FIREBASE_PROJECT_ID: demo-project
       FIREBASE_AUTH_EMULATOR_HOST: firebase-emulator:5503
       OLLAMA_BASE_URL: http://host.docker.internal:11434
+      # impornat for changing model around rate limits!!!
       DOCUMENT_STRUCTURER_PROVIDER: gemini-structurer-v1
+      # DOCUMENT_STRUCTURER_PROVIDER: opencode-zen-structurer-v1
       EMBEDDING_PROVIDER: ollama-emb-v1
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_STRUCTURER_MODEL: gemini-2.5-flash
       GEMINI_TEMPERATURE: "0"
+      OPENCODE_ZEN_API_KEY: ${OPENCODE_ZEN_API_KEY}
+      OPENCODE_ZEN_BASE_URL: https://opencode.ai/zen/v1/chat/completions
+      OPENCODE_ZEN_STRUCTURER_MODEL: minimax-m2.5-free
+      OPENCODE_ZEN_TEMPERATURE: "0"
     depends_on:
       postgres:
         condition: service_healthy
