@@ -1,4 +1,4 @@
-# RagPull: Full-Stack RAG Application
+# RagPull: Full-Stack RAG WebApp
 
 An end-to-end Retrieval-Augmented Generation (RAG) platform built with production-ready document ingestion, semantic search, and AI-driven chat, and a scalable, async backend processing pipeline.
 
