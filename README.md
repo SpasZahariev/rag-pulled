@@ -1,13 +1,11 @@
 # RagPull: Full-Stack RAG Application
 
-An end-to-end Retrieval-Augmented Generation (RAG) platform built to demonstrate a production-ready, local-first architecture for document ingestion, semantic search, and AI-driven chat. 
-
-This project was built to showcase a robust technical foundation integrating modern frontend frameworks with a scalable, async backend processing pipeline.
+An end-to-end Retrieval-Augmented Generation (RAG) platform built with production-ready document ingestion, semantic search, and AI-driven chat, and a scalable, async backend processing pipeline.
 
 ## 🚀 Key Features
 
 *   **Asynchronous Document Ingestion:** A robust backend worker queue built on PostgreSQL orchestrates the extraction, chunking, and embedding of various document types (PDF, CSV, TXT, etc.).
-*   **Local AI Integration:** Leverages local LLMs via Ollama (`qwen2.5:14b-instruct` for document structuring, `mxbai-embed-large` for embeddings) for entirely private, offline processing.
+*   **Local AI Integration:** Leverages local LLMs via Ollama (`qwen2.5:14b-instruct` for document structuring, `mxbai-embed-large` for embeddings) for entirely private, offline processing. (can be switched to online LLMS from env variables - gemini and opencode zen are available)
 *   **RAG Chat Interface:** An intuitive chat UI where users can query their uploaded knowledge base. The AI responses include precise citations, revealing exactly which document chunks and vector match percentages informed the answer.
 *   **Production-Ready Architecture:** Designed with a decoupled frontend (React/Vite) and backend (Hono API), complete with authentication (Firebase) and a relational database (PostgreSQL/Drizzle), ensuring a smooth path from local development to cloud deployment.
 
@@ -16,7 +14,7 @@ This project was built to showcase a robust technical foundation integrating mod
 *   **Frontend:** React, TypeScript, Vite, Tailwind CSS, ShadCN UI
 *   **Backend:** Node.js, Hono API, background worker processes
 *   **Database & ORM:** PostgreSQL, Drizzle ORM (handling both application data and vector storage/queues)
-*   **AI & Embeddings:** Ollama (Local LLMs), pluggable provider architecture
+*   **AI & Embeddings:** Ollama (Local LLMs), pluggable provider architecture, Gemini, Qwen, MinMax-2.5
 *   **Authentication:** Firebase Auth (with local emulator support)
 *   **Deployment:** Cloudflare Pages & Workers ready
 
@@ -82,10 +80,6 @@ flowchart TD
     AIModel -->|Response + Citations| ChatUI
 ```
 
-## 📸 Application Showcase
-
-*(Please take the screenshots as discussed and place them in the `docs/images/` folder. They will automatically render here once added).*
-
 ### The Dashboard
 The central hub for navigating the application.
 
@@ -103,7 +97,7 @@ The conversational interface for querying the knowledge base. Notice the "Source
 
 ## 💻 Local Development
 
-Everything needed to run RagPull is containerized or embedded for a seamless local developer experience.
+Everything needed to run RagPull is containerized or embedded for a seamless local developer experience. The whole project can be run with one command: `docker compose up --build`
 
 1.  **Install dependencies:**
     ```bash
